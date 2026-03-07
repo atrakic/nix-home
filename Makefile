@@ -52,7 +52,7 @@ lint:                         ## Run deadnix + statix linters locally
 	$(NIX) run nixpkgs#statix -- check .
 
 .PHONY: ci
-ci: fmt lint check pre-commit-run ## Run all CI checks locally
+ci: fmt lint check pre-commit-run ## Run all CI checks locally (mirrors pipeline)
 
 .PHONY: clean
 clean:                        ## Remove result symlink

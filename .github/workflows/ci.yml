@@ -11,29 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── 1. Format check ───────────────────────────────────────────────────
-  fmt:
-    name: Nix format
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: DeterminateSystems/nix-installer-action@v14
-        with:
-          extra-conf: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
-
-      - uses: DeterminateSystems/flake-checker-action@v9
-        with:
-          fail-mode: true
-
-      - name: Check formatting
-        run: nix fmt -- --check .
-
-  # ── 2. Flake evaluation + static checks ──────────────────────────────
-  check:
-    name: Nix flake check
+  # ── Lint: format + static analysis + pre-commit (fast, no build) ──────
+  lint:
+    name: Lint & check
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,14 +26,28 @@ jobs:
 
       - uses: DeterminateSystems/magic-nix-cache-action@v8
 
-      - name: Evaluate flake (no build)
+      - name: Check flake inputs (freshness)
+        uses: DeterminateSystems/flake-checker-action@v9
+        with:
+          fail-mode: true
+
+      - name: Format check
+        run: nix fmt -- --check .
+
+      - name: deadnix — unused bindings
+        run: nix run nixpkgs#deadnix -- --fail .
+
+      - name: statix — anti-pattern lint
+        run: nix run nixpkgs#statix -- check .
+
+      - name: flake check + pre-commit hooks
         run: nix flake check --no-build --show-trace
 
-  # ── 3. Build darwin configuration ────────────────────────────────────
+  # ── Build: full darwin system (expensive, runs after lint) ───────────
   build:
     name: Build darwinConfiguration
     runs-on: macos-latest
-    needs: check
+    needs: lint
     steps:
       - uses: actions/checkout@v4
 
@@ -70,53 +64,3 @@ jobs:
           nix build .#darwinConfigurations.Admirs-MacBook-Pro-M1.system \
             --show-trace \
             --print-build-logs
-
-  # ── 4. Deadnix — find unused nix expressions ─────────────────────────
-  deadnix:
-    name: Deadnix lint
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: DeterminateSystems/nix-installer-action@v14
-        with:
-          extra-conf: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
-
-      - name: Run deadnix
-        run: nix run nixpkgs#deadnix -- --fail .
-
-  # ── 5. Statix — nix anti-pattern linter ──────────────────────────────
-  statix:
-    name: Statix lint
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: DeterminateSystems/nix-installer-action@v14
-        with:
-          extra-conf: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
-
-      - name: Run statix
-        run: nix run nixpkgs#statix -- check .
-
-  # ── 6. Pre-commit hooks ───────────────────────────────────────────────
-  pre-commit:
-    name: Pre-commit hooks
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: DeterminateSystems/nix-installer-action@v14
-        with:
-          extra-conf: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
-
-      - uses: DeterminateSystems/magic-nix-cache-action@v8
-
-      - name: Run pre-commit hooks (via nix flake check)
-        run: nix flake check --no-build --show-trace
