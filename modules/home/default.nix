@@ -1,4 +1,5 @@
-{ user, ... }: {
+{ user, ... }:
+{
   imports = [
     ./packages.nix
     ./local-tools.nix
@@ -10,15 +11,15 @@
   ];
 
   home = {
-    username      = user;
+    username = user;
     homeDirectory = "/Users/${user}";
-    stateVersion  = "24.05";
+    stateVersion = "24.05";
 
     # ── Session variables available in all shells ────────────────────
     sessionVariables = {
-      EDITOR  = "nvim";
-      VISUAL  = "nvim";
-      PAGER   = "less -R";
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+      PAGER = "less -R";
       MANPAGER = "sh -c 'col -bx | bat -l man -p'";
     };
   };

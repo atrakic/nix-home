@@ -1,29 +1,30 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   programs.neovim = {
-    enable        = true;
+    enable = true;
     defaultEditor = true;
-    viAlias       = true;
-    vimAlias      = true;
+    viAlias = true;
+    vimAlias = true;
 
-    withPython3  = true;
-    withNodeJs   = true;
+    withPython3 = true;
+    withNodeJs = true;
 
     # ── LSP / formatter / linter binaries in nvim's PATH ─────────────
     extraPackages = with pkgs; [
       # Language servers
-      nil               # Nix LSP
+      nil # Nix LSP
       lua-language-server
-      pyright           # Python LSP
-      ruff              # Python linter + formatter
+      pyright # Python LSP
+      ruff # Python linter + formatter
       nodePackages.typescript-language-server
       nodePackages.vscode-langservers-extracted # html/css/json/eslint
-      gopls             # Go LSP
+      gopls # Go LSP
       rust-analyzer
       terraform-ls
       helm-ls
       yaml-language-server
       bash-language-server
-      taplo             # TOML LSP
+      taplo # TOML LSP
 
       # Formatters
       stylua
@@ -38,7 +39,7 @@
     ];
 
     plugins = with pkgs.vimPlugins; [
-      lazy-nvim          # plugin manager (installed via nix, loads Lua configs)
+      lazy-nvim # plugin manager (installed via nix, loads Lua configs)
     ];
 
     # ── Bootstrap lazy.nvim and hand off to lua config ────────────────

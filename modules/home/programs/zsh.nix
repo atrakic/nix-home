@@ -1,59 +1,60 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   programs.zsh = {
-    enable              = true;
-    autocd              = true;
-    enableCompletion    = true;
+    enable = true;
+    autocd = true;
+    enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
     history = {
-      size       = 100000;
-      save       = 100000;
-      share      = true;
+      size = 100000;
+      save = 100000;
+      share = true;
       ignoreDups = true;
       ignoreSpace = true;
-      extended   = true;
+      extended = true;
     };
 
     shellAliases = {
       # Navigation
-      ".."    = "cd ..";
-      "..."   = "cd ../..";
-      "~"     = "cd $HOME";
+      ".." = "cd ..";
+      "..." = "cd ../..";
+      "~" = "cd $HOME";
 
       # Better defaults
-      ls   = "eza --icons";
-      ll   = "eza -la --icons --git";
-      lt   = "eza --tree --icons -L 2";
-      cat  = "bat --paging=never";
+      ls = "eza --icons";
+      ll = "eza -la --icons --git";
+      lt = "eza --tree --icons -L 2";
+      cat = "bat --paging=never";
       grep = "rg";
       find = "fd";
       htop = "btop";
-      top  = "btop";
+      top = "btop";
 
       # Git
-      g    = "git";
-      ga   = "git add";
-      gc   = "git commit";
-      gp   = "git push";
-      gl   = "git lg";
-      gst  = "git st";
+      g = "git";
+      ga = "git add";
+      gc = "git commit";
+      gp = "git push";
+      gl = "git lg";
+      gst = "git st";
 
       # Nix / home
       nix-rebuild = "darwin-rebuild switch --flake ~/.config/nix-home";
-      nix-update  = "nix flake update ~/.config/nix-home && nix-rebuild";
-      nix-gc      = "nix-collect-garbage -d";
-      hm          = "home-manager";
+      nix-update = "nix flake update ~/.config/nix-home && nix-rebuild";
+      nix-gc = "nix-collect-garbage -d";
+      hm = "home-manager";
 
       # k8s
-      k    = "kubectl";
-      kga  = "kubectl get all";
-      kns  = "kubens";
+      k = "kubectl";
+      kga = "kubectl get all";
+      kns = "kubens";
       kctx = "kubectx";
 
       # Python
-      py   = "python3";
-      pip  = "uv pip";
+      py = "python3";
+      pip = "uv pip";
     };
 
     initContent = ''
@@ -91,37 +92,37 @@
 
       character = {
         success_symbol = "[❯](bold green)";
-        error_symbol   = "[❯](bold red)";
+        error_symbol = "[❯](bold red)";
       };
 
       directory = {
         truncation_length = 4;
-        truncate_to_repo  = false;
+        truncate_to_repo = false;
       };
 
-      git_branch.symbol  = " ";
-      python.symbol      = " ";
-      nodejs.symbol      = " ";
-      golang.symbol      = " ";
-      rust.symbol        = " ";
+      git_branch.symbol = " ";
+      python.symbol = " ";
+      nodejs.symbol = " ";
+      golang.symbol = " ";
+      rust.symbol = " ";
       docker_context.symbol = " ";
-      terraform.symbol   = "󱁢 ";
+      terraform.symbol = "󱁢 ";
       kubernetes = {
         disabled = false;
-        symbol   = "☸ ";
+        symbol = "☸ ";
       };
     };
   };
 
   programs.zoxide = {
-    enable      = true;
+    enable = true;
     enableZshIntegration = true;
   };
 
   programs.btop = {
     enable = true;
     settings = {
-      color_theme   = "gruvbox_dark";
+      color_theme = "gruvbox_dark";
       theme_background = false;
     };
   };

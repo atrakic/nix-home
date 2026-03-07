@@ -1,12 +1,13 @@
-{ ... }: {
+{ ... }:
+{
   # ── Homebrew ─────────────────────────────────────────────────────────
   # GUI apps and things not in nixpkgs. Nix manages the brew binary itself.
   homebrew = {
     enable = true;
     onActivation = {
-      autoUpdate  = true;
-      upgrade     = true;
-      cleanup     = "zap";   # remove unlisted formulae/casks
+      autoUpdate = true;
+      upgrade = true;
+      cleanup = "zap"; # remove unlisted formulae/casks
     };
 
     taps = [
@@ -14,7 +15,7 @@
     ];
 
     brews = [
-      "mas"          # Mac App Store CLI
+      "mas" # Mac App Store CLI
     ];
 
     casks = [
@@ -22,20 +23,20 @@
       "google-chrome"
 
       # ── Dev tools ───────────────────────────────────────────────────
-      "podman-desktop"     # OCI container GUI (Docker alternative)
-      "tableplus"          # DB GUI (Postgres, MySQL, Redis, …)
-      "insomnia"           # REST / GraphQL client
+      "podman-desktop" # OCI container GUI (Docker alternative)
+      "tableplus" # DB GUI (Postgres, MySQL, Redis, …)
+      "insomnia" # REST / GraphQL client
       "iterm2"
 
       # ── Productivity ─────────────────────────────────────────────────
-      "rectangle"          # Window manager
-      "displaylink"        # DisplayLink Manager (external displays)
+      "rectangle" # Window manager
+      "displaylink" # DisplayLink Manager (external displays)
 
       # ── Network ──────────────────────────────────────────────────────
-      "tailscale"          # VPN mesh network
+      "tailscale" # VPN mesh network
 
       # ── Media ────────────────────────────────────────────────────────
-      "vlc"                # Media player
+      "vlc" # Media player
 
       # ── Communication ────────────────────────────────────────────────
       "slack"

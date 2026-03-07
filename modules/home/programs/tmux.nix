@@ -1,18 +1,19 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   programs.tmux = {
-    enable       = true;
-    shell        = "${pkgs.zsh}/bin/zsh";
-    terminal     = "screen-256color";
+    enable = true;
+    shell = "${pkgs.zsh}/bin/zsh";
+    terminal = "screen-256color";
     historyLimit = 50000;
-    prefix       = "C-a";
-    escapeTime   = 0;
-    baseIndex    = 1;
-    mouse        = true;
-    keyMode      = "vi";
+    prefix = "C-a";
+    escapeTime = 0;
+    baseIndex = 1;
+    mouse = true;
+    keyMode = "vi";
 
     plugins = with pkgs.tmuxPlugins; [
       sensible
-      yank            # system clipboard
+      yank # system clipboard
       {
         plugin = resurrect;
         extraConfig = "set -g @resurrect-capture-pane-contents 'on'";
