@@ -41,7 +41,7 @@
         src = ./.;
         hooks = {
           # ── Nix ──────────────────────────────────────────────────────
-          nixfmt-rfc-style.enable = true; # format
+          nixfmt.enable = true; # format
           statix.enable = true; # anti-patterns
           deadnix.enable = true; # unused bindings
 
@@ -87,15 +87,15 @@
       };
 
       # Convenience: `nix fmt` to format all .nix files
-      formatter.${system} = pkgs.nixfmt-rfc-style;
+      formatter.${system} = pkgs.nixfmt;
 
       # Pre-commit hook checks (run via `nix flake check` or `make pre-commit`)
-      checks.${system}.pre-commit-check = pre-commit-check;
+      checks.${system} = { inherit pre-commit-check; };
 
       # Quick dev shell for bootstrapping (`nix develop`)
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = [
-          pkgs.nixfmt-rfc-style
+          pkgs.nixfmt
           pkgs.nil
           pkgs.deadnix
           pkgs.statix
@@ -103,7 +103,7 @@
         ]
         ++ pre-commit-check.enabledPackages;
         # Install hooks automatically when entering `nix develop`
-        shellHook = pre-commit-check.shellHook;
+        inherit (pre-commit-check) shellHook;
       };
     };
 }

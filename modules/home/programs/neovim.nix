@@ -30,7 +30,7 @@
       stylua
       nodePackages.prettier
       shfmt
-      nixfmt-rfc-style
+      nixfmt
 
       # Tools used by plugins
       ripgrep

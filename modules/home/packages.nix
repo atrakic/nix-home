@@ -58,7 +58,7 @@
 
     # ── Misc ─────────────────────────────────────────────────────────
     neofetch
-    nixfmt-rfc-style # nix formatter
+    nixfmt            # nix formatter
     nil # nix LSP
   ];
 }
