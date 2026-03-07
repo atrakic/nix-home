@@ -38,13 +38,21 @@ gc:                           ## Garbage collect old Nix generations
 	sudo nix-collect-garbage --delete-older-than 14d
 	nix-collect-garbage --delete-older-than 14d
 
+.PHONY: pre-commit-install
+pre-commit-install:           ## Install git pre-commit hooks (auto-runs in nix develop)
+	$(NIX) develop --command pre-commit install
+
+.PHONY: pre-commit-run
+pre-commit-run:               ## Run all pre-commit hooks against all files
+	$(NIX) develop --command pre-commit run --all-files
+
 .PHONY: lint
 lint:                         ## Run deadnix + statix linters locally
 	$(NIX) run nixpkgs#deadnix -- --fail .
 	$(NIX) run nixpkgs#statix -- check .
 
 .PHONY: ci
-ci: fmt lint check            ## Run all CI checks locally
+ci: fmt lint check pre-commit-run ## Run all CI checks locally
 
 .PHONY: clean
 clean:                        ## Remove result symlink

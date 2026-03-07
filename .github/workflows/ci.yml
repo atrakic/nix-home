@@ -102,3 +102,21 @@ jobs:
 
       - name: Run statix
         run: nix run nixpkgs#statix -- check .
+
+  # ── 6. Pre-commit hooks ───────────────────────────────────────────────
+  pre-commit:
+    name: Pre-commit hooks
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Run pre-commit hooks (via nix flake check)
+        run: nix flake check --no-build --show-trace

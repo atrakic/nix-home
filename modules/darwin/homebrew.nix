@@ -1,5 +1,4 @@
-_:
-{
+_: {
   # ── Homebrew ─────────────────────────────────────────────────────────
   # GUI apps and things not in nixpkgs. Nix manages the brew binary itself.
   homebrew = {

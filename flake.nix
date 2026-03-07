@@ -13,6 +13,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    pre-commit-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -20,6 +25,7 @@
       nixpkgs,
       nix-darwin,
       home-manager,
+      pre-commit-hooks,
       ...
     }:
     let
@@ -30,6 +36,36 @@
       # ───────────────────────────────────────────────────────────────────
 
       pkgs = nixpkgs.legacyPackages.${system};
+
+      pre-commit-check = pre-commit-hooks.lib.${system}.run {
+        src = ./.;
+        hooks = {
+          # ── Nix ──────────────────────────────────────────────────────
+          nixfmt-rfc-style.enable = true; # format
+          statix.enable = true; # anti-patterns
+          deadnix.enable = true; # unused bindings
+
+          # ── Flake check (runs `nix flake check --no-build`) ───────────
+          nix-flake-check = {
+            enable = true;
+            name = "nix flake check";
+            entry = "nix flake check --no-build";
+            pass_filenames = false;
+            language = "system";
+          };
+
+          # ── Shell scripts ─────────────────────────────────────────────
+          shellcheck.enable = true;
+          shfmt.enable = true;
+
+          # ── General ──────────────────────────────────────────────────
+          end-of-file-fixer.enable = true;
+          trim-trailing-whitespace.enable = true;
+          check-yaml.enable = true;
+          check-json.enable = true;
+          check-merge-conflict.enable = true;
+        };
+      };
     in
     {
       # `darwin-rebuild switch --flake .` or `make apply`
@@ -53,6 +89,9 @@
       # Convenience: `nix fmt` to format all .nix files
       formatter.${system} = pkgs.nixfmt-rfc-style;
 
+      # Pre-commit hook checks (run via `nix flake check` or `make pre-commit`)
+      checks.${system}.pre-commit-check = pre-commit-check;
+
       # Quick dev shell for bootstrapping (`nix develop`)
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = [
@@ -60,7 +99,11 @@
           pkgs.nil
           pkgs.deadnix
           pkgs.statix
-        ];
+          pkgs.pre-commit
+        ]
+        ++ pre-commit-check.enabledPackages;
+        # Install hooks automatically when entering `nix develop`
+        shellHook = pre-commit-check.shellHook;
       };
     };
 }
