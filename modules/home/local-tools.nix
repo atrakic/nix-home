@@ -1,4 +1,4 @@
-{ ... }:
+_:
 {
   # ── ~/bin — personal scripts managed by home-manager ─────────────────
   # Files here are symlinked from the Nix store; make them executable via

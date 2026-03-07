@@ -1,6 +1,8 @@
 { pkgs, ... }:
 {
-  programs.zsh = {
+  # Note: all programs.* merged under one programs block to satisfy statix W20
+  programs = {
+    zsh = {
     enable = true;
     autocd = true;
     enableCompletion = true;
@@ -82,9 +84,9 @@
       )
       export PATH
     '';
-  };
+    };
 
-  programs.starship = {
+    starship = {
     enable = true;
     settings = {
       format = "$all$character";
@@ -112,18 +114,19 @@
         symbol = "☸ ";
       };
     };
-  };
+    };
 
-  programs.zoxide = {
+    zoxide = {
     enable = true;
     enableZshIntegration = true;
-  };
+    };
 
-  programs.btop = {
+    btop = {
     enable = true;
     settings = {
       color_theme = "gruvbox_dark";
       theme_background = false;
+    };
     };
   };
 }

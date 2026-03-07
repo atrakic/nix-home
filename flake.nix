@@ -17,7 +17,6 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       nix-darwin,
       home-manager,
@@ -41,10 +40,12 @@
 
           home-manager.darwinModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.${user} = import ./modules/home;
-            home-manager.extraSpecialArgs = { inherit user; };
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users.${user} = import ./modules/home;
+              extraSpecialArgs = { inherit user; };
+            };
           }
         ];
       };
