@@ -69,6 +69,10 @@
 
           home-manager.darwinModules.home-manager
           {
+            users.users.${user} = {
+              home = "/Users/${user}";
+            };
+
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
