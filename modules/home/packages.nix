@@ -58,7 +58,7 @@
 
     # ── Misc ─────────────────────────────────────────────────────────
     neofetch
-    nixfmt            # nix formatter
+    nixfmt # nix formatter
     nil # nix LSP
   ];
 }
