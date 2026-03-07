@@ -57,13 +57,6 @@
           # ── Shell scripts ─────────────────────────────────────────────
           shellcheck.enable = true;
           shfmt.enable = true;
-
-          # ── General ──────────────────────────────────────────────────
-          end-of-file-fixer.enable = true;
-          trim-trailing-whitespace.enable = true;
-          check-yaml.enable = true;
-          check-json.enable = true;
-          check-merge-conflict.enable = true;
         };
       };
     in
