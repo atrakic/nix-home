@@ -89,6 +89,11 @@
               users.${user} = import ./modules/home;
               extraSpecialArgs = { inherit user; };
             };
+            # Define the user so home-manager's common module can resolve homeDirectory
+            users.users.${user} = {
+              home = "/Users/${user}";
+              shell = nixpkgs.legacyPackages.${darwinSystem}.zsh;
+            };
           }
         ];
       };
