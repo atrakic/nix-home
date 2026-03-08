@@ -1,4 +1,7 @@
 result
+
+# Docker
+.dockerignore
 result-*
 .direnv/
 .env

@@ -54,6 +54,14 @@ lint:                         ## Run deadnix + statix linters locally
 .PHONY: ci
 ci: fmt lint check pre-commit-run ## Run all CI checks locally (mirrors pipeline)
 
+.PHONY: docker-test
+docker-test:                  ## Run lint/check suite inside a Nix Docker container
+	DOCKER_HOST=unix:///var/run/docker.sock docker compose run --rm test
+
+.PHONY: docker-clean
+docker-clean:                 ## Remove Docker test image and nix-store volume
+	DOCKER_HOST=unix:///var/run/docker.sock docker compose down --rmi local --volumes
+
 .PHONY: clean
 clean:                        ## Remove result symlink
 	rm -f result
