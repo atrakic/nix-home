@@ -1,23 +1,36 @@
 # ── nix-home Makefile ────────────────────────────────────────────────────────
 # Usage:
-#   make          → apply full system + home config  (default)
-#   make update   → update all flake inputs then apply
+#   make          → apply (macOS) or test (Linux, CI)
+#   make update   → update all flake inputs then apply  [macOS only]
 #   make check    → lint / evaluate the flake without building
 #   make fmt      → format all .nix files
+#   make test     → run lint/check suite in a Nix Docker container (Linux)
 #   make gc       → garbage collect Nix store
 #   make clean    → remove result symlink
 
 FLAKE      := $(CURDIR)
-HOSTNAME   := $(shell hostname -s)
+UNAME      := $(shell uname -s)
+HOSTNAME   := $(shell hostname -s 2>/dev/null || echo "$${HOSTNAME:-unknown}")
 NIX        := nix --extra-experimental-features "nix-command flakes"
-REBUILD    := darwin-rebuild switch --flake "$(FLAKE)"
+DOCKER     := DOCKER_HOST=unix:///var/run/docker.sock docker compose
 
-.DEFAULT_GOAL := apply
+ifeq ($(UNAME),Darwin)
+  REBUILD  := darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+else
+  REBUILD  := sudo nixos-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+endif
+
+# On Linux (container / CI) default to the lint+check suite; on macOS apply.
+ifeq ($(UNAME),Darwin)
+  .DEFAULT_GOAL := apply
+else
+  .DEFAULT_GOAL := ci
+endif
 
 # ── Primary targets ──────────────────────────────────────────────────────────
 
 .PHONY: apply
-apply:                        ## ★ Apply config (single command: make)
+apply:                        ## ★ Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
 	$(REBUILD)
 
 .PHONY: update
@@ -56,11 +69,18 @@ ci: fmt lint check pre-commit-run ## Run all CI checks locally (mirrors pipeline
 
 .PHONY: docker-test
 docker-test:                  ## Run lint/check suite inside a Nix Docker container
-	DOCKER_HOST=unix:///var/run/docker.sock docker compose run --rm test
+	$(DOCKER) run --rm test
+
+.PHONY: test
+test: docker-test             ## Alias for docker-test
+
+.PHONY: docker-shell
+docker-shell:                 ## Open an interactive shell in the Nix container (for debugging)
+	$(DOCKER) run --rm -it --entrypoint sh test
 
 .PHONY: docker-clean
 docker-clean:                 ## Remove Docker test image and nix-store volume
-	DOCKER_HOST=unix:///var/run/docker.sock docker compose down --rmi local --volumes
+	$(DOCKER) down --rmi local --volumes
 
 .PHONY: clean
 clean:                        ## Remove result symlink

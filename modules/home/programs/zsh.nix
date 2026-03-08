@@ -1,9 +1,10 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   # Note: all programs.* merged under one programs block to satisfy statix W20
   programs = {
     zsh = {
       enable = true;
+      dotDir = "${config.xdg.configHome}/zsh"; # explicit XDG-compatible location
       autocd = true;
       enableCompletion = true;
       autosuggestion.enable = true;

@@ -13,6 +13,9 @@ RUN mkdir -p /etc/nix && printf '%s\n' \
 # Trust any mounted workspace regardless of UID (fixes git ownership check)
 RUN git config --global --add safe.directory '*'
 
+# Install make and other useful shell tools
+RUN nix-env -iA nixpkgs.gnumake nixpkgs.bash
+
 WORKDIR /workspace
 COPY . .
 

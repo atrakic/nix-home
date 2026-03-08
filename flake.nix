@@ -1,5 +1,5 @@
 {
-  description = "nix-home — macOS bootstrap for a data/fullstack/architect dev environment";
+  description = "nix-home — cross-platform (macOS + Linux) dev environment bootstrap";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -29,10 +29,16 @@
       ...
     }:
     let
-      # ── Edit these to match your machine ───────────────────────────────
+      # ── Edit these to match your machines ──────────────────────────────
       user = "adtr";
-      hostname = "nix-dev-box";
+
+      # macOS
+      darwinHostname = "Admirs-MacBook-Pro-M1";
       darwinSystem = "aarch64-darwin"; # use "x86_64-darwin" for Intel Macs
+
+      # Linux (NixOS) — change to match your box
+      linuxHostname = "nix-dev-box";
+      linuxSystem = "x86_64-linux"; # use "aarch64-linux" for ARM servers
       # ───────────────────────────────────────────────────────────────────
 
       # Systems that produce formatter / checks / devShells outputs
@@ -70,12 +76,11 @@
         };
     in
     {
-      # `darwin-rebuild switch --flake .` or `make apply`
-      darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
+      # ── macOS: `darwin-rebuild switch --flake .#<hostname>` ─────────────
+      darwinConfigurations.${darwinHostname} = nix-darwin.lib.darwinSystem {
         system = darwinSystem;
         modules = [
           ./modules/darwin
-
           home-manager.darwinModules.home-manager
           {
             home-manager = {
@@ -83,6 +88,33 @@
               useUserPackages = true;
               users.${user} = import ./modules/home;
               extraSpecialArgs = { inherit user; };
+            };
+          }
+        ];
+      };
+
+      # ── Linux (NixOS): `nixos-rebuild switch --flake .#<hostname>` ───────
+      nixosConfigurations.${linuxHostname} = nixpkgs.lib.nixosSystem {
+        system = linuxSystem;
+        modules = [
+          ./modules/linux
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users.${user} = import ./modules/home;
+              extraSpecialArgs = { inherit user; };
+            };
+            # Create the user account on NixOS
+            users.users.${user} = {
+              isNormalUser = true;
+              shell = nixpkgs.legacyPackages.${linuxSystem}.zsh;
+              extraGroups = [
+                "wheel"
+                "docker"
+                "networkmanager"
+              ];
             };
           }
         ];

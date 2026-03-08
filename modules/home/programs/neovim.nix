@@ -43,7 +43,7 @@
     ];
 
     # ── Bootstrap lazy.nvim and hand off to lua config ────────────────
-    extraLuaConfig = ''
+    initLua = ''
       -- ── Options ──────────────────────────────────────────────────────
       vim.g.mapleader        = " "
       vim.g.maplocalleader   = " "

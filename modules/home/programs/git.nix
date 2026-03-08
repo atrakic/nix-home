@@ -1,30 +1,22 @@
-_: {
+{ pkgs, ... }:
+{
   programs.git = {
     enable = true;
-    userName = "adtr";
-    userEmail = "adtr@users.noreply.github.com"; # change to your email
 
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;
-        side-by-side = true;
-        line-numbers = true;
-        syntax-theme = "gruvbox-dark";
+    settings = {
+      user.name = "adtr";
+      user.email = "adtr@users.noreply.github.com"; # change to your email
+
+      alias = {
+        lg = "log --oneline --graph --decorate --all";
+        st = "status -sb";
+        co = "checkout";
+        br = "branch";
+        oops = "commit --amend --no-edit";
+        undo = "reset --soft HEAD~1";
+        wip = "!git add -A && git commit -m 'wip'";
       };
-    };
 
-    aliases = {
-      lg = "log --oneline --graph --decorate --all";
-      st = "status -sb";
-      co = "checkout";
-      br = "branch";
-      oops = "commit --amend --no-edit";
-      undo = "reset --soft HEAD~1";
-      wip = "!git add -A && git commit -m 'wip'";
-    };
-
-    extraConfig = {
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
@@ -36,7 +28,8 @@ _: {
         autocrlf = "input";
         whitespace = "trailing-space,space-before-tab";
       };
-      credential.helper = "osxkeychain";
+      # macOS keychain — ignored on Linux
+      credential.helper = pkgs.lib.optionalString pkgs.stdenv.isDarwin "osxkeychain";
       url."git@github.com:".insteadOf = "https://github.com/";
     };
 
@@ -52,5 +45,16 @@ _: {
       "node_modules/"
       ".vscode/settings.json"
     ];
+  };
+
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+      side-by-side = true;
+      line-numbers = true;
+      syntax-theme = "gruvbox-dark";
+    };
   };
 }

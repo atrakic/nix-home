@@ -15,7 +15,7 @@
     tree
     watch
     hyperfine # benchmarking
-    du-dust # better du
+    dust # better du
     duf # better df
     procs # better ps
 
@@ -29,6 +29,7 @@
     # ── Dev ──────────────────────────────────────────────────────────
     git
     git-lfs
+    tig
     gh # GitHub CLI
     pre-commit
     direnv
@@ -57,7 +58,8 @@
     k9s # Kubernetes TUI
 
     # ── Misc ─────────────────────────────────────────────────────────
-    neofetch
+    fastfetch # system info (neofetch replacement)
+    yt-dlp # download YouTube / 1000+ sites
     nixfmt # nix formatter
     nil # nix LSP
   ];
