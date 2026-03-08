@@ -25,9 +25,9 @@
         "~" = "cd $HOME";
 
         # Better defaults
-        ls = "eza --icons";
-        ll = "eza -la --icons --git";
-        lt = "eza --tree --icons -L 2";
+        #ls = "eza --icons";
+        #ll = "eza -la --icons --git";
+        #lt = "eza --tree --icons -L 2";
         cat = "bat --paging=never";
         grep = "rg";
         find = "fd";
@@ -57,6 +57,19 @@
         # Python
         py = "python3";
         pip = "uv pip";
+      };
+
+      oh-my-zsh = {
+        enable = true;
+        # No theme — starship handles the prompt
+        plugins = [
+          "git"
+          "fzf"
+          "direnv"
+          "macos"
+          "colored-man-pages"
+          "command-not-found"
+        ];
       };
 
       initContent = ''
