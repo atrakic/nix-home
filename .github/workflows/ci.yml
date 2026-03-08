@@ -11,12 +11,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Lint: format + static analysis + pre-commit (fast, no build) ──────
+  # ── Lint: format + static analysis + flake check (Linux, fast) ───────
   lint:
     name: Lint & check
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - uses: DeterminateSystems/nix-installer-action@v14
         with:
@@ -43,13 +43,13 @@ jobs:
       - name: flake check + pre-commit hooks
         run: nix flake check --no-build --show-trace
 
-  # ── Build: full darwin system (expensive, runs after lint) ───────────
-  build:
+  # ── Build: macOS (darwin) configuration ──────────────────────────────
+  build-darwin:
     name: Build darwinConfiguration
     runs-on: macos-latest
     needs: lint
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - uses: DeterminateSystems/nix-installer-action@v14
         with:
@@ -62,5 +62,27 @@ jobs:
       - name: Build darwin configuration
         run: |
           nix build .#darwinConfigurations.Admirs-MacBook-Pro-M1.system \
+            --show-trace \
+            --print-build-logs
+
+  # ── Build: Linux (NixOS) configuration ───────────────────────────────
+  build-linux:
+    name: Build nixosConfiguration
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Build nixos configuration
+        run: |
+          nix build .#nixosConfigurations.nix-dev-box.config.system.build.toplevel \
             --show-trace \
             --print-build-logs
