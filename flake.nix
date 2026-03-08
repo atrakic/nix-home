@@ -31,6 +31,7 @@
     let
       # ── Edit these to match your machine ───────────────────────────────
       user = "adtr";
+      homeDir = "/Users/${user}";
       hostname = "Admirs-MacBook-Pro-M1";
       system = "aarch64-darwin"; # use "x86_64-darwin" for Intel Macs
       # ───────────────────────────────────────────────────────────────────
@@ -69,6 +70,10 @@
 
           home-manager.darwinModules.home-manager
           {
+            users.users.${user} = {
+              home = homeDir;
+            };
+
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;

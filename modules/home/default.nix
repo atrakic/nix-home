@@ -12,7 +12,6 @@
 
   home = {
     username = user;
-    homeDirectory = "/Users/${user}";
     stateVersion = "24.05";
 
     # ── Session variables available in all shells ────────────────────
