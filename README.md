@@ -1,8 +1,8 @@
 # nix-home
 
-> macOS developer environment — **one command to rule them all**.
+> Developer environment — **one command to rule them all**.
 
-A **modular, flake-based** nix-darwin + home-manager configuration for a data / full-stack / solution-architect workflow.
+A **modular, flake-based** nix-darwin + home-manager configuration for a data / full-stack workflow.
 
 ---
 
@@ -137,7 +137,7 @@ Add a cask name to [`modules/darwin/homebrew.nix`](modules/darwin/homebrew.nix) 
 `kubectl`, `kubectx`, `helm`, `k9s`
 
 ### macOS apps (Homebrew Cask)
-Podman Desktop, TablePlus, Insomnia, iTerm2, Raycast, Rectangle, Obsidian, Tailscale, VLC
+Podman Desktop, TablePlus, Insomnia, iTerm2, Rectangle, Tailscale, VLC
 
 ---
 
