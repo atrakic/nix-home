@@ -103,12 +103,18 @@ ensure_darwin_etc_files() {
     printf 'run\tprivate/var/run\n' | sudo tee -a /etc/synthetic.conf >/dev/null
   fi
 
-  if [[ ! -e /run ]] || [[ "$(readlink /run 2>/dev/null || true)" != "/private/var/run" ]]; then
+  if [[ ! -e /run ]] || {
+    [[ "$(readlink /run 2>/dev/null || true)" != "/private/var/run" ]] &&
+    [[ "$(readlink /run 2>/dev/null || true)" != "private/var/run" ]];
+  }; then
     step "Applying synthetic filesystem entries"
     if ! sudo /System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t; then
       die "macOS did not materialize /run from /etc/synthetic.conf. Reboot, then rerun install.sh"
     fi
-    if [[ ! -e /run ]] || [[ "$(readlink /run 2>/dev/null || true)" != "/private/var/run" ]]; then
+    if [[ ! -e /run ]] || {
+      [[ "$(readlink /run 2>/dev/null || true)" != "/private/var/run" ]] &&
+      [[ "$(readlink /run 2>/dev/null || true)" != "private/var/run" ]];
+    }; then
       die "/run is still unavailable after apfs.util -t. Reboot, then rerun install.sh"
     fi
   fi
