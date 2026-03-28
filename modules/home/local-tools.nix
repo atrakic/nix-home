@@ -4,6 +4,10 @@ _: {
   # the `executable = true` attribute.
 
   home.file = {
+    "bin/install-vim-plug.sh" = {
+      executable = true;
+      text = builtins.readFile ./bin/install-vim-plug.sh;
+    };
 
     # -- localhost.run tunnel ------------------------------------------
     # Expose a local port via the free localhost.run SSH tunnel service.
