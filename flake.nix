@@ -64,7 +64,6 @@
 
       # -- Host builders --------------------------------------------------
       mkDarwinHost =
-        hostname:
         { system, user }:
         nix-darwin.lib.darwinSystem {
           inherit system;
@@ -90,7 +89,6 @@
         };
 
       mkNixosHost =
-        hostname:
         { system, user }:
         nixpkgs.lib.nixosSystem {
           inherit system;
