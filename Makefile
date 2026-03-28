@@ -175,9 +175,17 @@ endif
 ensure-darwin-etc:
 ifeq ($(UNAME),Darwin)
 	@if [ ! -e /etc/synthetic.conf ]; then \
-		echo "Creating empty /etc/synthetic.conf"; \
+		echo "Creating /etc/synthetic.conf"; \
 		sudo touch /etc/synthetic.conf; \
 		sudo chmod 644 /etc/synthetic.conf; \
+	fi
+	@if ! grep -qx 'run	private/var/run' /etc/synthetic.conf; then \
+		echo "Adding /run synthetic mapping to /etc/synthetic.conf"; \
+		printf 'run\tprivate/var/run\n' | sudo tee -a /etc/synthetic.conf >/dev/null; \
+	fi
+	@if [ ! -e /run ] || [ "$$(readlink /run 2>/dev/null)" != "/private/var/run" ]; then \
+		echo "Applying synthetic filesystem entries"; \
+		sudo /System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t; \
 	fi
 	@for f in /etc/nix/nix.conf /etc/bashrc /etc/zshrc /etc/zprofile; do \
 		if [ -e "$$f" ] && [ ! -L "$$f" ]; then \
