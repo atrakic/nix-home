@@ -19,18 +19,31 @@
 
       init.defaultBranch = "main";
       pull.rebase = true;
-      push.autoSetupRemote = true;
-      rebase.autoStash = true;
-      merge.conflictstyle = "zdiff3";
-      diff.algorithm = "histogram";
-      core = {
-        editor = "nvim";
-        autocrlf = "input";
-        whitespace = "trailing-space,space-before-tab";
+      push = {
+        default = "current";
+        autoSetupRemote = true;
       };
-      # macOS keychain - ignored on Linux
-      credential.helper = pkgs.lib.optionalString pkgs.stdenv.isDarwin "osxkeychain";
-      url."git@github.com:".insteadOf = "https://github.com/";
+      diff = {
+        #external = "/usr/bin/vimdiff";
+        renames = "copies";
+        mnemonicprefix = true;
+        submodule = "log";
+      };
+      branch = {
+        autosetupmerge = true;
+        autosetuprebase = "remote";
+      };
+      merge.stat = true;
+      #merge.tool = "xxdiff";
+      color.ui = "auto";
+      rerere.enabled = true;
+      advice = {
+        statusHints = true;
+        pushNonFastForward = false;
+      };
+      fetch.prune = true;
+      help.autocorrect = 1;
+      status.submoduleSummary = true;
     };
 
     ignores = [
