@@ -52,7 +52,7 @@ endif
 # -- Primary targets ----------------------------------------------------------
 
 .PHONY: apply
-apply: ensure-host ensure-brew ## * Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
+apply: ensure-host ensure-brew ensure-darwin-etc ## * Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
 ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
 		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
@@ -64,7 +64,7 @@ else
 endif
 
 .PHONY: update
-update: ensure-host ensure-brew ## Update flake inputs then apply
+update: ensure-host ensure-brew ensure-darwin-etc ## Update flake inputs then apply
 	$(NIX) flake update
 ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
@@ -127,7 +127,7 @@ clean:                        ## Remove result symlink
 # -- Bootstrap (first run only) ------------------------------------------------
 
 .PHONY: bootstrap
-bootstrap: ensure-host ensure-brew ## Install nix-darwin for the first time
+bootstrap: ensure-host ensure-brew ensure-darwin-etc ## Install nix-darwin for the first time
 	@echo "-> Installing nix-darwin..."
 	sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"
 
@@ -138,7 +138,7 @@ show:                         ## Show flake outputs
 	$(NIX) flake show .
 
 .PHONY: diff
-diff: ensure-host ensure-brew ## Show what would change (dry-run)
+diff: ensure-host ensure-brew ensure-darwin-etc ## Show what would change (dry-run)
 ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
 		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60; \
@@ -167,6 +167,24 @@ ifeq ($(UNAME),Darwin)
 		echo "Homebrew not found. Installing Homebrew..."; \
 		NONINTERACTIVE=1 /bin/bash -c "$$(/usr/bin/curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
 	fi
+else
+	@true
+endif
+
+.PHONY: ensure-darwin-etc
+ensure-darwin-etc:
+ifeq ($(UNAME),Darwin)
+	@for f in /etc/nix/nix.conf /etc/bashrc /etc/zshrc /etc/zprofile; do \
+		if [ -e "$$f" ] && [ ! -L "$$f" ]; then \
+			backup="$$f.before-nix-darwin"; \
+			if [ ! -e "$$backup" ]; then \
+				echo "Archiving $$f -> $$backup"; \
+				sudo mv "$$f" "$$backup"; \
+			else \
+				echo "Backup exists for $$f ($$backup), leaving current file in place"; \
+			fi; \
+		fi; \
+	 done
 else
 	@true
 endif
