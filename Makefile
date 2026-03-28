@@ -11,7 +11,8 @@
 FLAKE      := $(CURDIR)
 UNAME      := $(shell uname -s)
 HOSTNAME   := $(shell h=$$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "$${HOSTNAME:-unknown}"); printf '%s' "$${h%%.*}")
-NIX        := nix --extra-experimental-features "nix-command flakes"
+NIX_BIN    := $(shell command -v nix 2>/dev/null || echo /nix/var/nix/profiles/default/bin/nix)
+NIX        := $(NIX_BIN) --extra-experimental-features "nix-command flakes"
 DOCKER     := DOCKER_HOST=unix:///var/run/docker.sock docker compose
 TARGET_HOST ?=
 

@@ -17,6 +17,7 @@ DETECTED_HOST="$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "unknow
 TARGET_HOST="${TARGET_HOST:-${DETECTED_HOST%%.*}}"  # must match flake key
 OS="$(uname -s)"
 RUN_ID="$(date +%Y%m%d-%H%M%S)"
+NIX_BIN="$(command -v nix 2>/dev/null || echo /nix/var/nix/profiles/default/bin/nix)"
 
 step() { echo "[STEP] $*"; }
 ok()   { echo "[OK]   $*"; }
@@ -157,6 +158,7 @@ if ! command -v nix &>/dev/null; then
   curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon --yes
   # shellcheck disable=SC1091
   source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+  NIX_BIN="$(command -v nix 2>/dev/null || echo /nix/var/nix/profiles/default/bin/nix)"
   ok "Nix installed: $(nix --version)"
 else
   ok "Nix already installed: $(nix --version)"
@@ -203,7 +205,7 @@ fi
 if [[ "$OS" == "Darwin" ]]; then
   if ! command -v darwin-rebuild &>/dev/null; then
     step "Bootstrapping nix-darwin for host '$TARGET_HOST'..."
-    sudo nix run nix-darwin -- switch --flake "$REPO_DIR#$TARGET_HOST"
+    sudo "$NIX_BIN" --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake "$REPO_DIR#$TARGET_HOST"
   else
     step "Running darwin-rebuild switch for host '$TARGET_HOST'..."
     sudo darwin-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
@@ -214,7 +216,7 @@ elif [[ "$OS" == "Linux" ]]; then
     sudo nixos-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
   else
     step "Running nixos-rebuild via nix run for host '$TARGET_HOST'..."
-    sudo nix run nixpkgs#nixos-rebuild -- switch --flake "$REPO_DIR#$TARGET_HOST"
+    sudo "$NIX_BIN" --extra-experimental-features "nix-command flakes" run nixpkgs#nixos-rebuild -- switch --flake "$REPO_DIR#$TARGET_HOST"
   fi
 fi
 
