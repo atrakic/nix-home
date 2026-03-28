@@ -9,9 +9,7 @@ _: {
       cleanup = "zap"; # remove unlisted formulae/casks
     };
 
-    taps = [
-      "homebrew/bundle"
-    ];
+    taps = [ ];
 
     brews = [
       "mas" # Mac App Store CLI
