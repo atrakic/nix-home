@@ -14,6 +14,10 @@ HOSTNAME   := $(shell hostname -s 2>/dev/null || echo "$${HOSTNAME:-unknown}")
 NIX        := nix --extra-experimental-features "nix-command flakes"
 DOCKER     := DOCKER_HOST=unix:///var/run/docker.sock docker compose
 
+# Make spawns a non-interactive sh that doesn't source shell profiles.
+# Prepend the standard Nix / nix-darwin binary paths so tools are found.
+export PATH := /run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$(PATH)
+
 
 # On Linux (container / CI) default to the lint+check suite; on macOS apply.
 ifeq ($(UNAME),Darwin)
@@ -104,7 +108,11 @@ show:                         ## Show flake outputs
 
 .PHONY: diff
 diff:                         ## Show what would change (dry-run)
-	$(REBUILD) --dry-run 2>&1 | head -60
+ifeq ($(UNAME),Darwin)
+	darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)" --dry-run 2>&1 | head -60
+else
+	sudo nixos-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)" --dry-run 2>&1 | head -60
+endif
 
 .PHONY: help
 help:                         ## Print this help message
