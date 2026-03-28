@@ -24,12 +24,12 @@
         oops = "commit --amend --no-edit";
         undo = "reset --soft HEAD~1";
         wip = "!git add -A && git commit -m 'wip'";
-        merged = "!git branch -a --merged";            # list merged branches
-        cherry-pick = "!f() { git rebase $1^ ; }; f";  # 1 - commitid
+        merged = "!git branch -a --merged"; # list merged branches
+        cherry-pick = "!f() { git rebase $1^ ; }; f"; # 1 - commitid
         # LeaderBoards:
         rank = "shortlog -sn --all --no-merges";
         stats = "!git shortlog -sn --since='10 weeks' --until='2 weeks'";
-        everyone = "!git log --all --oneline --no-merges";   # see what everyones been getting up to
+        everyone = "!git log --all --oneline --no-merges"; # see what everyones been getting up to
         overview = "!git log --all --since='2 weeks' --oneline --no-merges";
       };
 

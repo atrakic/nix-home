@@ -3,7 +3,9 @@
   programs.vim = {
     enable = true;
     extraConfig =
-      builtins.readFile ../vimrc + "\n" + ''
+      builtins.readFile ../vimrc
+      + "\n"
+      + ''
         call plug#begin('~/.vim/plugged')
         Plug 'junegunn/vim-easy-align'
         Plug 'christoomey/vim-tmux-navigator'
