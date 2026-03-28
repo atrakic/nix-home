@@ -2,9 +2,6 @@
 {
   imports = [ ./homebrew.nix ];
 
-  # ── Nix daemon ──────────────────────────────────────────────────────
-  services.nix-daemon.enable = true;
-
   nix = {
     settings = {
       experimental-features = [
@@ -24,12 +21,12 @@
     };
   };
 
-  # ── Shell ────────────────────────────────────────────────────────────
+  # -- Shell ------------------------------------------------------------
   programs.zsh.enable = true;
 
   environment.systemPackages = [ pkgs.vim ]; # bare minimum in PATH
 
-  # ── macOS system defaults ────────────────────────────────────────────
+  # -- macOS system defaults --------------------------------------------
   system.defaults = {
     dock = {
       autohide = true;
@@ -59,7 +56,7 @@
     screensaver.askForPassword = true;
   };
 
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   system.stateVersion = 5;
 }

@@ -4,12 +4,12 @@
     enable = true;
     defaultEditor = true;
     viAlias = true;
-    vimAlias = true;
+    vimAlias = false;
 
     withPython3 = true;
     withNodeJs = true;
 
-    # ── LSP / formatter / linter binaries in nvim's PATH ─────────────
+    # -- LSP / formatter / linter binaries in nvim's PATH -------------
     extraPackages = with pkgs; [
       # Language servers
       nil # Nix LSP
@@ -42,9 +42,9 @@
       lazy-nvim # plugin manager (installed via nix, loads Lua configs)
     ];
 
-    # ── Bootstrap lazy.nvim and hand off to lua config ────────────────
+    # -- Bootstrap lazy.nvim and hand off to lua config ----------------
     initLua = ''
-      -- ── Options ──────────────────────────────────────────────────────
+      -- -- Options ------------------------------------------------------
       vim.g.mapleader        = " "
       vim.g.maplocalleader   = " "
 
@@ -68,11 +68,11 @@
       opt.updatetime     = 200
       opt.clipboard      = "unnamedplus"
 
-      -- ── Bootstrap lazy.nvim (nix-managed) ────────────────────────────
+      -- -- Bootstrap lazy.nvim (nix-managed) ----------------------------
       local lazypath = "${pkgs.vimPlugins.lazy-nvim}/share/nvim/site/pack/lazy/opt/lazy.nvim"
       vim.opt.rtp:prepend(lazypath)
 
-      -- ── Plugins ───────────────────────────────────────────────────────
+      -- -- Plugins -------------------------------------------------------
       require("lazy").setup({
         -- Colourscheme
         {
@@ -206,7 +206,7 @@
         performance = { rtp = { disabled_plugins = { "gzip", "tarPlugin", "tofu", "zipPlugin" } } },
       })
 
-      -- ── Key mappings ──────────────────────────────────────────────────
+      -- -- Key mappings --------------------------------------------------
       local map = vim.keymap.set
       map("n", "<leader>w",  "<cmd>w<cr>",          { desc = "Save" })
       map("n", "<leader>q",  "<cmd>q<cr>",           { desc = "Quit" })
@@ -224,4 +224,5 @@
       map("v", "K", ":m '<-2<CR>gv=gv")
     '';
   };
+
 }

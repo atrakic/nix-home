@@ -8,29 +8,58 @@
       user.email = "adtr@users.noreply.github.com"; # change to your email
 
       alias = {
-        lg = "log --oneline --graph --decorate --all";
-        st = "status -sb";
-        co = "checkout";
+        sha = "rev-parse HEAD";
+        last = "log -1 HEAD";
+        ci = "commit";
         br = "branch";
+        co = "checkout";
+        staged = "diff --cached";
+        lg = "log --oneline --graph --decorate --all";
+        up = "!git remote update -p; git merge --ff-only @{u}";
+        logc = "log --color --graph --pretty=format:'%Cred%h%Creset-%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'";
+        st = "status -sb";
+        amend = "commit -a --amend";
+        save = "!git add -A && git commit -m 'SAVEPOINT'";
+        tree = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
         oops = "commit --amend --no-edit";
         undo = "reset --soft HEAD~1";
         wip = "!git add -A && git commit -m 'wip'";
+        merged = "!git branch -a --merged";            # list merged branches
+        cherry-pick = "!f() { git rebase $1^ ; }; f";  # 1 - commitid
+        # LeaderBoards:
+        rank = "shortlog -sn --all --no-merges";
+        stats = "!git shortlog -sn --since='10 weeks' --until='2 weeks'";
+        everyone = "!git log --all --oneline --no-merges";   # see what everyones been getting up to
+        overview = "!git log --all --since='2 weeks' --oneline --no-merges";
       };
 
       init.defaultBranch = "main";
       pull.rebase = true;
-      push.autoSetupRemote = true;
-      rebase.autoStash = true;
-      merge.conflictstyle = "zdiff3";
-      diff.algorithm = "histogram";
-      core = {
-        editor = "nvim";
-        autocrlf = "input";
-        whitespace = "trailing-space,space-before-tab";
+      push = {
+        default = "current";
+        autoSetupRemote = true;
       };
-      # macOS keychain — ignored on Linux
-      credential.helper = pkgs.lib.optionalString pkgs.stdenv.isDarwin "osxkeychain";
-      url."git@github.com:".insteadOf = "https://github.com/";
+      diff = {
+        #external = "/usr/bin/vimdiff";
+        renames = "copies";
+        mnemonicprefix = true;
+        submodule = "log";
+      };
+      branch = {
+        autosetupmerge = true;
+        autosetuprebase = "remote";
+      };
+      merge.stat = true;
+      #merge.tool = "xxdiff";
+      color.ui = "auto";
+      rerere.enabled = true;
+      advice = {
+        statusHints = true;
+        pushNonFastForward = false;
+      };
+      fetch.prune = true;
+      help.autocorrect = 1;
+      status.submoduleSummary = true;
     };
 
     ignores = [

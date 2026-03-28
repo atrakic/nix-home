@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Lint: format + static analysis + flake check (Linux, fast) ───────
+  # -- Lint: format + static analysis + flake check (Linux, fast) -------
   lint:
     name: Lint & check
     runs-on: ubuntu-latest
@@ -34,17 +34,17 @@ jobs:
       - name: Format check
         run: nix fmt -- --check .
 
-      - name: deadnix — unused bindings
+      - name: deadnix - unused bindings
         run: nix run nixpkgs#deadnix -- --fail .
 
-      - name: statix — anti-pattern lint
+      - name: statix - anti-pattern lint
         run: nix run nixpkgs#statix -- check .
 
       - name: flake check + pre-commit hooks
         if: false # skip pre-commit hooks for now
         run: nix flake check --no-build --show-trace
 
-  # ── Build: macOS (darwin) configuration ──────────────────────────────
+  # -- Build: macOS (darwin) configuration ------------------------------
   build-darwin:
     name: Build darwinConfiguration
     runs-on: macos-latest
@@ -66,7 +66,7 @@ jobs:
             --show-trace \
             --print-build-logs
 
-  # ── Build: Linux (NixOS) configuration ───────────────────────────────
+  # -- Build: Linux (NixOS) configuration -------------------------------
   build-linux:
     name: Build nixosConfiguration
     runs-on: ubuntu-latest

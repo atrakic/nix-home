@@ -1,6 +1,6 @@
 # nix-home
 
-> Developer environment — **one command to rule them all**.
+> Developer environment - **one command to rule them all**.
 
 A **modular, flake-based** nix-darwin + home-manager configuration for a data / full-stack workflow.
 
@@ -11,12 +11,20 @@ A **modular, flake-based** nix-darwin + home-manager configuration for a data / 
 ### Fresh machine (first run)
 
 ```bash
-# Option A — pipe installer directly
+# Option A - pipe installer directly
 curl -fsSL https://raw.githubusercontent.com/atrakic/nix-home/main/install.sh | bash
 
-# Option B — clone first, then run
+# Option B - clone first, then run
 git clone https://github.com/atrakic/nix-home ~/.config/nix-home
 cd ~/.config/nix-home && bash install.sh
+```
+
+The installer now runs a preflight for both macOS and Linux (tools, network,
+sudo, and host key check in `flake.nix`). If your `hostname -s` differs from
+the flake key, override it:
+
+```bash
+TARGET_HOST=your-host-key bash install.sh
 ```
 
 ### Already have Nix?
@@ -24,22 +32,44 @@ cd ~/.config/nix-home && bash install.sh
 ```bash
 git clone https://github.com/atrakic/nix-home ~/.config/nix-home
 cd ~/.config/nix-home
-make          # ← single command
+# 1. Add your machine to darwinHosts / linuxHosts in flake.nix (key = hostname -s)
+# 2. Bootstrap & apply:
+make bootstrap   # first time - installs nix-darwin (requires sudo)
+sudo make apply  # system activation (requires sudo)
+make user-apply  # user dotfiles and plugins (no sudo)
 ```
 
 ---
 
 ## Day-to-day commands
 
-| Command       | Description                                 |
-| ------------- | ------------------------------------------- |
-| `make`        | ★ Apply all config changes                  |
-| `make update` | Update all flake inputs, then apply         |
-| `make check`  | Evaluate flake without building (fast lint) |
-| `make fmt`    | Format all `.nix` files                     |
-| `make gc`     | Garbage-collect old Nix store generations   |
-| `make diff`   | Preview what would change (dry-run)         |
-| `make help`   | List all targets                            |
+| Command           | Description                                                     |
+| ----------------- | --------------------------------------------------------------- |
+| `sudo make apply` | * Apply system config (nix-darwin/nixos-rebuild, requires sudo) |
+| `make user-apply` | * Apply user dotfiles and plugins (home-manager, no sudo)       |
+| `make bootstrap`  | First-time nix-darwin install (requires sudo)                   |
+| `make update`     | Update all flake inputs, then apply                             |
+| `make check`      | Evaluate flake without building (fast lint)                     |
+| `make fmt`        | Format all `.nix` files                                         |
+| `make gc`         | Garbage-collect old Nix store generations                       |
+| `make diff`       | Preview what would change (dry-run)                             |
+| `make help`       | List all targets                                                |
+
+
+
+**Usage:**
+- Run `sudo make apply` for system config (nix-darwin/nixos-rebuild).
+- Then run `make user-apply` as your user (no sudo) to set up all dotfiles and plugins (including `.vimrc` and `.vim/plugged`).
+
+**Vim setup:**
+- Your `.vimrc` and `.vim/autoload/plug.vim` are managed by Nix/home-manager.
+- All plugins in your `.vimrc` are auto-installed after every `make apply`.
+**.vimrc or plugins not present after apply?**
+
+Make sure you run both steps:
+1. `sudo make apply` (system config)
+2. `make user-apply` (user dotfiles/plugins)
+
 
 ---
 
@@ -47,37 +77,41 @@ make          # ← single command
 
 ```
 nix-home/
-├── flake.nix                  ← entry point; edit user/hostname here
-├── Makefile                   ← make = apply full config
-├── install.sh                 ← one-shot bootstrap for a new machine
-└── modules/
-    ├── darwin/
-    │   ├── default.nix        ← macOS system settings, nix-daemon
-    │   └── homebrew.nix       ← GUI apps via Homebrew Cask
-    └── home/
-        ├── default.nix        ← home-manager root
-        ├── packages.nix       ← CLI tools, languages, infra
-        └── programs/
-            ├── git.nix        ← git + delta
-            ├── zsh.nix        ← zsh + starship + zoxide + btop
-            ├── tmux.nix       ← tmux + vim-keys + catppuccin
-            ├── neovim.nix     ← neovim with LSP, completion, formatting
-            └── vscode.nix     ← VSCode extensions + settings
+|-- flake.nix                  <- entry point; machine registry + config builders
+|-- Makefile                   <- make = apply full config (auto-detects hostname)
+|-- install.sh                 <- one-shot bootstrap for a new machine
+`-- modules/
+  |-- darwin/
+  |   |-- default.nix        <- macOS system settings, nix-daemon
+  |   `-- homebrew.nix       <- GUI apps via Homebrew Cask
+  `-- home/
+    |-- default.nix        <- home-manager root
+    |-- packages.nix       <- CLI tools, languages, infra
+    `-- programs/
+      |-- git.nix        <- git + delta
+      |-- zsh.nix        <- zsh + starship + zoxide + btop
+      |-- tmux.nix       <- tmux + vim-keys + catppuccin
+      |-- neovim.nix     <- neovim with LSP, completion, formatting
+      `-- vscode.nix     <- VSCode extensions + settings
 ```
 
 ---
 
 ## Customisation
 
-### Change user / hostname
+### Add a new machine
 
-Edit the top of [`flake.nix`](flake.nix):
+Add an entry to `darwinHosts` (macOS) or `linuxHosts` (NixOS) in [`flake.nix`](flake.nix).
+The key **must** match `hostname -s` on that machine:
 
 ```nix
-user     = "your-username";
-hostname = "your-Mac-hostname";   # hostname -s
-system   = "aarch64-darwin";      # x86_64-darwin for Intel
+darwinHosts = {
+  "Admirs-MacBook-Pro-M1" = { system = "aarch64-darwin"; user = "adtr"; };
+  "My-New-Mac"            = { system = "aarch64-darwin"; user = "me";   };
+};
 ```
+
+Then on the new machine: `make bootstrap && make`.
 
 ### Add a new CLI tool
 
@@ -97,20 +131,20 @@ Add a cask name to [`modules/darwin/homebrew.nix`](modules/darwin/homebrew.nix) 
 ## What's included
 
 ### Shell & terminal
-- **zsh** — autosuggestions, syntax highlighting, 100k history
-- **Starship** — async prompt with git/k8s/language context
-- **zoxide** — smarter `cd`
-- **fzf / ripgrep / fd / bat / eza / delta** — modern Unix replacements
-- **tmux** — prefix `C-a`, vim keys, catppuccin theme, auto-save/restore
+- **zsh** - autosuggestions, syntax highlighting, 100k history
+- **Starship** - async prompt with git/k8s/language context
+- **zoxide** - smarter `cd`
+- **fzf / ripgrep / fd / bat / eza / delta** - modern Unix replacements
+- **tmux** - prefix `C-a`, vim keys, catppuccin theme, auto-save/restore
 
 ### Neovim
-- **lazy.nvim** (nix-managed) — fast plugin loading
+- **lazy.nvim** (nix-managed) - fast plugin loading
 - **LSPs**: nil (Nix), pyright, ts_ls, gopls, rust-analyzer, terraformls, yamlls, bashls
-- **Treesitter** — syntax for all major languages
-- **Telescope** — fuzzy find files/grep/buffers
-- **conform.nvim** — auto-format on save
-- **nvim-cmp** — completion + snippets
-- Catppuccin theme → Tokyo Night night
+- **Treesitter** - syntax for all major languages
+- **Telescope** - fuzzy find files/grep/buffers
+- **conform.nvim** - auto-format on save
+- **nvim-cmp** - completion + snippets
+- Catppuccin theme -> Tokyo Night night
 
 ### VSCode extensions
 | Category      | Extensions                                            |
@@ -143,11 +177,11 @@ Podman Desktop, TablePlus, Insomnia, iTerm2, Rectangle, Tailscale, VLC
 
 ## Prerequisites
 
-| Requirement        | Notes                                           |
-| ------------------ | ----------------------------------------------- |
-| macOS 14+ (Sonoma) | arm64 or x86_64                                 |
-| Xcode CLT          | `xcode-select --install`                        |
-| Nix                | Installed by `install.sh` (Determinate Systems) |
+| Requirement        | Notes                                          |
+| ------------------ | ---------------------------------------------- |
+| macOS 14+ (Sonoma) | arm64 or x86_64                                |
+| Xcode CLT          | `xcode-select --install`                       |
+| Nix                | Installed by `install.sh` (official installer) |
 
 ---
 
