@@ -26,9 +26,9 @@ require_cmd() {
 }
 
 preflight() {
-  step "Running preflight checks for $OS…"
+  step "Running preflight checks for ${OS}..."
 
-  case "$OS" in
+  case "${OS}" in
     Darwin|Linux) ;;
     *) die "Unsupported OS '$OS' (supported: Darwin, Linux)" ;;
   esac
@@ -46,11 +46,11 @@ preflight() {
   curl --proto '=https' --tlsv1.2 -fsSLI https://github.com >/dev/null \
     || die "Cannot reach https://github.com"
 
-  if [[ "$OS" == "Darwin" ]] && ! xcode-select -p &>/dev/null; then
+  if [[ "${OS}" == "Darwin" ]] && ! xcode-select -p &>/dev/null; then
     die "Xcode Command Line Tools are required. Run: xcode-select --install"
   fi
 
-  if [[ "$OS" == "Linux" ]] && [[ ! -e /etc/NIXOS ]]; then
+  if [[ "${OS}" == "Linux" ]] && [[ ! -e /etc/NIXOS ]]; then
     warn "Non-NixOS Linux detected. This repo applies system config via nixos-rebuild."
     warn "Installer will continue, but final activation may not be applicable on this distro."
   fi
