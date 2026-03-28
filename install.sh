@@ -13,7 +13,8 @@ set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-$HOME/.config/nix-home}"
 NIX_CONF="/etc/nix/nix.conf"
-TARGET_HOST="${TARGET_HOST:-$(hostname -s 2>/dev/null || echo "unknown")}"  # must match flake key
+DETECTED_HOST="$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "unknown")"
+TARGET_HOST="${TARGET_HOST:-${DETECTED_HOST%%.*}}"  # must match flake key
 OS="$(uname -s)"
 RUN_ID="$(date +%Y%m%d-%H%M%S)"
 

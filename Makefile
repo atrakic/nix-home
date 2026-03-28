@@ -10,9 +10,32 @@
 
 FLAKE      := $(CURDIR)
 UNAME      := $(shell uname -s)
-HOSTNAME   := $(shell hostname -s 2>/dev/null || echo "$${HOSTNAME:-unknown}")
+HOSTNAME   := $(shell h=$$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "$${HOSTNAME:-unknown}"); printf '%s' "$${h%%.*}")
 NIX        := nix --extra-experimental-features "nix-command flakes"
 DOCKER     := DOCKER_HOST=unix:///var/run/docker.sock docker compose
+TARGET_HOST ?=
+
+# Resolve flake host key:
+# 1) explicit TARGET_HOST (if provided)
+# 2) current hostname if present in corresponding host map
+# 3) first key in corresponding host map
+ifeq ($(UNAME),Darwin)
+	DEFAULT_FLAKE_HOST := $(shell \
+		if grep -Eq '"$(HOSTNAME)"[[:space:]]*=' "$(FLAKE)/flake.nix"; then \
+			echo "$(HOSTNAME)"; \
+		else \
+			awk '/darwinHosts[[:space:]]*=[[:space:]]*\{/{inset=1;next} inset && /\};/{inset=0} inset && match($$0,/"([^"]+)"[[:space:]]*=/,m){print m[1]; exit}' "$(FLAKE)/flake.nix"; \
+		fi)
+else
+	DEFAULT_FLAKE_HOST := $(shell \
+		if grep -Eq '"$(HOSTNAME)"[[:space:]]*=' "$(FLAKE)/flake.nix"; then \
+			echo "$(HOSTNAME)"; \
+		else \
+			awk '/linuxHosts[[:space:]]*=[[:space:]]*\{/{inset=1;next} inset && /\};/{inset=0} inset && match($$0,/"([^"]+)"[[:space:]]*=/,m){print m[1]; exit}' "$(FLAKE)/flake.nix"; \
+		fi)
+endif
+
+FLAKE_HOST := $(if $(TARGET_HOST),$(TARGET_HOST),$(DEFAULT_FLAKE_HOST))
 
 # Make spawns a non-interactive sh that doesn't source shell profiles.
 # Prepend the standard Nix / nix-darwin binary paths so tools are found.
@@ -29,20 +52,28 @@ endif
 # -- Primary targets ----------------------------------------------------------
 
 .PHONY: apply
-apply:                        ## * Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
+apply: ensure-host            ## * Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
 ifeq ($(UNAME),Darwin)
-	darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+	@if command -v darwin-rebuild >/dev/null 2>&1; then \
+		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
+	else \
+		sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
+	fi
 else
-	sudo nixos-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+	sudo nixos-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"
 endif
 
 .PHONY: update
-update:                       ## Update flake inputs then apply
+update: ensure-host           ## Update flake inputs then apply
 	$(NIX) flake update
 ifeq ($(UNAME),Darwin)
-	darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+	@if command -v darwin-rebuild >/dev/null 2>&1; then \
+		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
+	else \
+		sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
+	fi
 else
-	sudo nixos-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+	sudo nixos-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"
 endif
 
 .PHONY: check
@@ -96,9 +127,9 @@ clean:                        ## Remove result symlink
 # -- Bootstrap (first run only) ------------------------------------------------
 
 .PHONY: bootstrap
-bootstrap:                    ## Install nix-darwin for the first time
+bootstrap: ensure-host        ## Install nix-darwin for the first time
 	@echo "-> Installing nix-darwin..."
-	sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(HOSTNAME)"
+	sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"
 
 # -- Info ---------------------------------------------------------------------
 
@@ -107,12 +138,25 @@ show:                         ## Show flake outputs
 	$(NIX) flake show .
 
 .PHONY: diff
-diff:                         ## Show what would change (dry-run)
+diff: ensure-host             ## Show what would change (dry-run)
 ifeq ($(UNAME),Darwin)
-	darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)" --dry-run 2>&1 | head -60
+	@if command -v darwin-rebuild >/dev/null 2>&1; then \
+		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60; \
+	else \
+		sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60; \
+	fi
 else
-	sudo nixos-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)" --dry-run 2>&1 | head -60
+	sudo nixos-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60
 endif
+
+.PHONY: ensure-host
+ensure-host:
+	@if [ -z "$(FLAKE_HOST)" ]; then \
+		echo "ERROR: Could not resolve flake host key from flake.nix."; \
+		echo "Set one explicitly: make $$@ TARGET_HOST=<host-key>"; \
+		exit 1; \
+	fi
+	@echo "Using flake host: $(FLAKE_HOST)"
 
 .PHONY: help
 help:                         ## Print this help message

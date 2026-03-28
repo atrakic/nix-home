@@ -37,6 +37,10 @@
           system = "aarch64-darwin";
           user = "adtr";
         };
+        "Admirs-MacBook-Air" = {
+          system = "aarch64-darwin";
+          user = "atrakic";
+        };
         # "My-Intel-Mac" = { system = "x86_64-darwin"; user = "someone"; };
       };
 
