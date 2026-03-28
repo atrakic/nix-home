@@ -24,22 +24,29 @@ cd ~/.config/nix-home && bash install.sh
 ```bash
 git clone https://github.com/atrakic/nix-home ~/.config/nix-home
 cd ~/.config/nix-home
-make          # ← single command
+# 1. Add your machine to darwinHosts / linuxHosts in flake.nix (key = hostname -s)
+# 2. Bootstrap & apply:
+make bootstrap   # first time — installs nix-darwin (requires sudo)
+make             # apply config
 ```
 
 ---
 
 ## Day-to-day commands
 
-| Command       | Description                                 |
-| ------------- | ------------------------------------------- |
-| `make`        | ★ Apply all config changes                  |
-| `make update` | Update all flake inputs, then apply         |
-| `make check`  | Evaluate flake without building (fast lint) |
-| `make fmt`    | Format all `.nix` files                     |
-| `make gc`     | Garbage-collect old Nix store generations   |
-| `make diff`   | Preview what would change (dry-run)         |
-| `make help`   | List all targets                            |
+| Command          | Description                                   |
+| ---------------- | --------------------------------------------- |
+| `make`           | ★ Apply all config changes                    |
+| `make bootstrap` | First-time nix-darwin install (requires sudo) |
+| `make update`    | Update all flake inputs, then apply           |
+| `make check`     | Evaluate flake without building (fast lint)   |
+| `make fmt`       | Format all `.nix` files                       |
+| `make gc`        | Garbage-collect old Nix store generations     |
+| `make diff`      | Preview what would change (dry-run)           |
+| `make help`      | List all targets                              |
+
+The Makefile auto-detects your hostname (`hostname -s`) and selects the
+matching `darwinConfigurations` / `nixosConfigurations` entry from the flake.
 
 ---
 
@@ -47,8 +54,8 @@ make          # ← single command
 
 ```
 nix-home/
-├── flake.nix                  ← entry point; edit user/hostname here
-├── Makefile                   ← make = apply full config
+├── flake.nix                  ← entry point; machine registry + config builders
+├── Makefile                   ← make = apply full config (auto-detects hostname)
 ├── install.sh                 ← one-shot bootstrap for a new machine
 └── modules/
     ├── darwin/
@@ -69,15 +76,19 @@ nix-home/
 
 ## Customisation
 
-### Change user / hostname
+### Add a new machine
 
-Edit the top of [`flake.nix`](flake.nix):
+Add an entry to `darwinHosts` (macOS) or `linuxHosts` (NixOS) in [`flake.nix`](flake.nix).
+The key **must** match `hostname -s` on that machine:
 
 ```nix
-user     = "your-username";
-hostname = "your-Mac-hostname";   # hostname -s
-system   = "aarch64-darwin";      # x86_64-darwin for Intel
+darwinHosts = {
+  "Admirs-MacBook-Pro-M1" = { system = "aarch64-darwin"; user = "adtr"; };
+  "My-New-Mac"            = { system = "aarch64-darwin"; user = "me";   };
+};
 ```
+
+Then on the new machine: `make bootstrap && make`.
 
 ### Add a new CLI tool
 

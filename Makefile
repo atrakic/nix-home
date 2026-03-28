@@ -98,7 +98,7 @@ clean:                        ## Remove result symlink
 .PHONY: bootstrap
 bootstrap:                    ## Install nix-darwin for the first time
 	@echo "→ Installing nix-darwin…"
-	sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)"
+	sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(HOSTNAME)"
 
 # ── Info ─────────────────────────────────────────────────────────────────────
 

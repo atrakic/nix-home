@@ -29,16 +29,24 @@
       ...
     }:
     let
-      # ── Edit these to match your machines ──────────────────────────────
-      user = "adtr";
+      # ── Machine registry ───────────────────────────────────────────────
+      # Add your machines here.  The Makefile selects the matching config
+      # via `--flake .#$(hostname -s)`, so the key MUST equal `hostname -s`.
+      darwinHosts = {
+        "Admirs-MacBook-Pro-M1" = {
+          system = "aarch64-darwin";
+          user = "adtr";
+        };
+        # "My-Intel-Mac" = { system = "x86_64-darwin"; user = "someone"; };
+      };
 
-      # macOS
-      darwinHostname = "Admirs-MacBook-Pro-M1";
-      darwinSystem = "aarch64-darwin"; # use "x86_64-darwin" for Intel Macs
-
-      # Linux (NixOS) — change to match your box
-      linuxHostname = "nix-dev-box";
-      linuxSystem = "x86_64-linux"; # use "aarch64-linux" for ARM servers
+      linuxHosts = {
+        "nix-dev-box" = {
+          system = "x86_64-linux";
+          user = "adtr";
+        };
+        # "arm-server" = { system = "aarch64-linux"; user = "admin"; };
+      };
       # ───────────────────────────────────────────────────────────────────
 
       # Systems that produce formatter / checks / devShells outputs
@@ -49,6 +57,58 @@
         "x86_64-linux"
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
+
+      # ── Host builders ──────────────────────────────────────────────────
+      mkDarwinHost =
+        hostname:
+        { system, user }:
+        nix-darwin.lib.darwinSystem {
+          inherit system;
+          modules = [
+            ./modules/darwin
+            home-manager.darwinModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                users.${user} = import ./modules/home;
+                extraSpecialArgs = { inherit user; };
+              };
+              users.users.${user} = {
+                home = "/Users/${user}";
+                shell = nixpkgs.legacyPackages.${system}.zsh;
+              };
+            }
+          ];
+        };
+
+      mkNixosHost =
+        hostname:
+        { system, user }:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            ./modules/linux
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                users.${user} = import ./modules/home;
+                extraSpecialArgs = { inherit user; };
+              };
+              users.users.${user} = {
+                isNormalUser = true;
+                shell = nixpkgs.legacyPackages.${system}.zsh;
+                extraGroups = [
+                  "wheel"
+                  "docker"
+                  "networkmanager"
+                ];
+              };
+            }
+          ];
+        };
 
       mkPreCommitCheck =
         system:
@@ -77,53 +137,10 @@
     in
     {
       # ── macOS: `darwin-rebuild switch --flake .#<hostname>` ─────────────
-      darwinConfigurations.${darwinHostname} = nix-darwin.lib.darwinSystem {
-        system = darwinSystem;
-        modules = [
-          ./modules/darwin
-          home-manager.darwinModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users.${user} = import ./modules/home;
-              extraSpecialArgs = { inherit user; };
-            };
-            # Define the user so home-manager's common module can resolve homeDirectory
-            users.users.${user} = {
-              home = "/Users/${user}";
-              shell = nixpkgs.legacyPackages.${darwinSystem}.zsh;
-            };
-          }
-        ];
-      };
+      darwinConfigurations = builtins.mapAttrs mkDarwinHost darwinHosts;
 
       # ── Linux (NixOS): `nixos-rebuild switch --flake .#<hostname>` ───────
-      nixosConfigurations.${linuxHostname} = nixpkgs.lib.nixosSystem {
-        system = linuxSystem;
-        modules = [
-          ./modules/linux
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users.${user} = import ./modules/home;
-              extraSpecialArgs = { inherit user; };
-            };
-            # Create the user account on NixOS
-            users.users.${user} = {
-              isNormalUser = true;
-              shell = nixpkgs.legacyPackages.${linuxSystem}.zsh;
-              extraGroups = [
-                "wheel"
-                "docker"
-                "networkmanager"
-              ];
-            };
-          }
-        ];
-      };
+      nixosConfigurations = builtins.mapAttrs mkNixosHost linuxHosts;
 
       # Convenience: `nix fmt` to format all .nix files
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
