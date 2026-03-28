@@ -19,7 +19,7 @@
     homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${user}" else "/home/${user}";
     stateVersion = "24.05";
 
-    # ── Session variables available in all shells ────────────────────
+    # -- Session variables available in all shells --------------------
     sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";

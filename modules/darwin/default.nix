@@ -2,7 +2,7 @@
 {
   imports = [ ./homebrew.nix ];
 
-  # ── Nix daemon ──────────────────────────────────────────────────────
+  # -- Nix daemon ------------------------------------------------------
   services.nix-daemon.enable = true;
 
   nix = {
@@ -24,12 +24,12 @@
     };
   };
 
-  # ── Shell ────────────────────────────────────────────────────────────
+  # -- Shell ------------------------------------------------------------
   programs.zsh.enable = true;
 
   environment.systemPackages = [ pkgs.vim ]; # bare minimum in PATH
 
-  # ── macOS system defaults ────────────────────────────────────────────
+  # -- macOS system defaults --------------------------------------------
   system.defaults = {
     dock = {
       autohide = true;

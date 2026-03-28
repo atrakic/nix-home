@@ -1,6 +1,6 @@
 # nix-home
 
-> Developer environment — **one command to rule them all**.
+> Developer environment - **one command to rule them all**.
 
 A **modular, flake-based** nix-darwin + home-manager configuration for a data / full-stack workflow.
 
@@ -11,10 +11,10 @@ A **modular, flake-based** nix-darwin + home-manager configuration for a data / 
 ### Fresh machine (first run)
 
 ```bash
-# Option A — pipe installer directly
+# Option A - pipe installer directly
 curl -fsSL https://raw.githubusercontent.com/atrakic/nix-home/main/install.sh | bash
 
-# Option B — clone first, then run
+# Option B - clone first, then run
 git clone https://github.com/atrakic/nix-home ~/.config/nix-home
 cd ~/.config/nix-home && bash install.sh
 ```
@@ -34,7 +34,7 @@ git clone https://github.com/atrakic/nix-home ~/.config/nix-home
 cd ~/.config/nix-home
 # 1. Add your machine to darwinHosts / linuxHosts in flake.nix (key = hostname -s)
 # 2. Bootstrap & apply:
-make bootstrap   # first time — installs nix-darwin (requires sudo)
+make bootstrap   # first time - installs nix-darwin (requires sudo)
 make             # apply config
 ```
 
@@ -44,7 +44,7 @@ make             # apply config
 
 | Command          | Description                                   |
 | ---------------- | --------------------------------------------- |
-| `make`           | ★ Apply all config changes                    |
+| `make`           | * Apply all config changes                    |
 | `make bootstrap` | First-time nix-darwin install (requires sudo) |
 | `make update`    | Update all flake inputs, then apply           |
 | `make check`     | Evaluate flake without building (fast lint)   |
@@ -62,22 +62,22 @@ matching `darwinConfigurations` / `nixosConfigurations` entry from the flake.
 
 ```
 nix-home/
-├── flake.nix                  ← entry point; machine registry + config builders
-├── Makefile                   ← make = apply full config (auto-detects hostname)
-├── install.sh                 ← one-shot bootstrap for a new machine
-└── modules/
-    ├── darwin/
-    │   ├── default.nix        ← macOS system settings, nix-daemon
-    │   └── homebrew.nix       ← GUI apps via Homebrew Cask
-    └── home/
-        ├── default.nix        ← home-manager root
-        ├── packages.nix       ← CLI tools, languages, infra
-        └── programs/
-            ├── git.nix        ← git + delta
-            ├── zsh.nix        ← zsh + starship + zoxide + btop
-            ├── tmux.nix       ← tmux + vim-keys + catppuccin
-            ├── neovim.nix     ← neovim with LSP, completion, formatting
-            └── vscode.nix     ← VSCode extensions + settings
+|-- flake.nix                  <- entry point; machine registry + config builders
+|-- Makefile                   <- make = apply full config (auto-detects hostname)
+|-- install.sh                 <- one-shot bootstrap for a new machine
+`-- modules/
+  |-- darwin/
+  |   |-- default.nix        <- macOS system settings, nix-daemon
+  |   `-- homebrew.nix       <- GUI apps via Homebrew Cask
+  `-- home/
+    |-- default.nix        <- home-manager root
+    |-- packages.nix       <- CLI tools, languages, infra
+    `-- programs/
+      |-- git.nix        <- git + delta
+      |-- zsh.nix        <- zsh + starship + zoxide + btop
+      |-- tmux.nix       <- tmux + vim-keys + catppuccin
+      |-- neovim.nix     <- neovim with LSP, completion, formatting
+      `-- vscode.nix     <- VSCode extensions + settings
 ```
 
 ---
@@ -116,20 +116,20 @@ Add a cask name to [`modules/darwin/homebrew.nix`](modules/darwin/homebrew.nix) 
 ## What's included
 
 ### Shell & terminal
-- **zsh** — autosuggestions, syntax highlighting, 100k history
-- **Starship** — async prompt with git/k8s/language context
-- **zoxide** — smarter `cd`
-- **fzf / ripgrep / fd / bat / eza / delta** — modern Unix replacements
-- **tmux** — prefix `C-a`, vim keys, catppuccin theme, auto-save/restore
+- **zsh** - autosuggestions, syntax highlighting, 100k history
+- **Starship** - async prompt with git/k8s/language context
+- **zoxide** - smarter `cd`
+- **fzf / ripgrep / fd / bat / eza / delta** - modern Unix replacements
+- **tmux** - prefix `C-a`, vim keys, catppuccin theme, auto-save/restore
 
 ### Neovim
-- **lazy.nvim** (nix-managed) — fast plugin loading
+- **lazy.nvim** (nix-managed) - fast plugin loading
 - **LSPs**: nil (Nix), pyright, ts_ls, gopls, rust-analyzer, terraformls, yamlls, bashls
-- **Treesitter** — syntax for all major languages
-- **Telescope** — fuzzy find files/grep/buffers
-- **conform.nvim** — auto-format on save
-- **nvim-cmp** — completion + snippets
-- Catppuccin theme → Tokyo Night night
+- **Treesitter** - syntax for all major languages
+- **Telescope** - fuzzy find files/grep/buffers
+- **conform.nvim** - auto-format on save
+- **nvim-cmp** - completion + snippets
+- Catppuccin theme -> Tokyo Night night
 
 ### VSCode extensions
 | Category      | Extensions                                            |

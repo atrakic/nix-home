@@ -1,12 +1,12 @@
-# ── nix-home Makefile ────────────────────────────────────────────────────────
+# -- nix-home Makefile --------------------------------------------------------
 # Usage:
-#   make          → apply (macOS) or test (Linux, CI)
-#   make update   → update all flake inputs then apply  [macOS only]
-#   make check    → lint / evaluate the flake without building
-#   make fmt      → format all .nix files
-#   make test     → run lint/check suite in a Nix Docker container (Linux)
-#   make gc       → garbage collect Nix store
-#   make clean    → remove result symlink
+#   make          -> apply (macOS) or test (Linux, CI)
+#   make update   -> update all flake inputs then apply  [macOS only]
+#   make check    -> lint / evaluate the flake without building
+#   make fmt      -> format all .nix files
+#   make test     -> run lint/check suite in a Nix Docker container (Linux)
+#   make gc       -> garbage collect Nix store
+#   make clean    -> remove result symlink
 
 FLAKE      := $(CURDIR)
 UNAME      := $(shell uname -s)
@@ -26,10 +26,10 @@ else
   .DEFAULT_GOAL := ci
 endif
 
-# ── Primary targets ──────────────────────────────────────────────────────────
+# -- Primary targets ----------------------------------------------------------
 
 .PHONY: apply
-apply:                        ## ★ Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
+apply:                        ## * Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
 ifeq ($(UNAME),Darwin)
 	darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
 else
@@ -93,14 +93,14 @@ docker-clean:                 ## Remove Docker test image and nix-store volume
 clean:                        ## Remove result symlink
 	rm -f result
 
-# ── Bootstrap (first run only) ────────────────────────────────────────────────
+# -- Bootstrap (first run only) ------------------------------------------------
 
 .PHONY: bootstrap
 bootstrap:                    ## Install nix-darwin for the first time
-	@echo "→ Installing nix-darwin…"
+	@echo "-> Installing nix-darwin..."
 	sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(HOSTNAME)"
 
-# ── Info ─────────────────────────────────────────────────────────────────────
+# -- Info ---------------------------------------------------------------------
 
 .PHONY: show
 show:                         ## Show flake outputs

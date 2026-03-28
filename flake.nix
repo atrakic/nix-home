@@ -1,5 +1,5 @@
 {
-  description = "nix-home — cross-platform (macOS + Linux) dev environment bootstrap";
+  description = "nix-home - cross-platform (macOS + Linux) dev environment bootstrap";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -29,7 +29,7 @@
       ...
     }:
     let
-      # ── Machine registry ───────────────────────────────────────────────
+      # -- Machine registry -----------------------------------------------
       # Add your machines here.  The Makefile selects the matching config
       # via `--flake .#$(hostname -s)`, so the key MUST equal `hostname -s`.
       darwinHosts = {
@@ -47,7 +47,7 @@
         };
         # "arm-server" = { system = "aarch64-linux"; user = "admin"; };
       };
-      # ───────────────────────────────────────────────────────────────────
+      # -------------------------------------------------------------------
 
       # Systems that produce formatter / checks / devShells outputs
       systems = [
@@ -58,7 +58,7 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
 
-      # ── Host builders ──────────────────────────────────────────────────
+      # -- Host builders --------------------------------------------------
       mkDarwinHost =
         hostname:
         { system, user }:
@@ -115,12 +115,12 @@
         pre-commit-hooks.lib.${system}.run {
           src = ./.;
           hooks = {
-            # ── Nix ──────────────────────────────────────────────────────
+            # -- Nix ------------------------------------------------------
             nixfmt.enable = true; # format
             statix.enable = true; # anti-patterns
             deadnix.enable = true; # unused bindings
 
-            # ── Flake check (runs `nix flake check --no-build`) ───────────
+            # -- Flake check (runs `nix flake check --no-build`) -----------
             nix-flake-check = {
               enable = true;
               name = "nix flake check";
@@ -129,17 +129,17 @@
               language = "system";
             };
 
-            # ── Shell scripts ─────────────────────────────────────────────
+            # -- Shell scripts ---------------------------------------------
             shellcheck.enable = true;
             shfmt.enable = true;
           };
         };
     in
     {
-      # ── macOS: `darwin-rebuild switch --flake .#<hostname>` ─────────────
+      # -- macOS: `darwin-rebuild switch --flake .#<hostname>` -------------
       darwinConfigurations = builtins.mapAttrs mkDarwinHost darwinHosts;
 
-      # ── Linux (NixOS): `nixos-rebuild switch --flake .#<hostname>` ───────
+      # -- Linux (NixOS): `nixos-rebuild switch --flake .#<hostname>` -------
       nixosConfigurations = builtins.mapAttrs mkNixosHost linuxHosts;
 
       # Convenience: `nix fmt` to format all .nix files

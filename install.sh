@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ── install.sh ───────────────────────────────────────────────────────────────
+# -- install.sh ---------------------------------------------------------------
 # Bootstrap a brand-new machine (macOS or Linux) with this flake.
 # Run this ONCE on a fresh machine.
 #
@@ -8,18 +8,19 @@
 # Or clone first:
 #   git clone https://github.com/atrakic/nix-home ~/.config/nix-home
 #   cd ~/.config/nix-home && bash install.sh
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-$HOME/.config/nix-home}"
 NIX_CONF="/etc/nix/nix.conf"
 TARGET_HOST="${TARGET_HOST:-$(hostname -s 2>/dev/null || echo "unknown")}"  # must match flake key
 OS="$(uname -s)"
+RUN_ID="$(date +%Y%m%d-%H%M%S)"
 
-step() { echo -e "\033[1;34m==>\033[0m $*"; }
-ok()   { echo -e "\033[1;32m ✓\033[0m  $*"; }
-warn() { echo -e "\033[1;33m !\033[0m  $*"; }
-die()  { echo -e "\033[1;31mERROR:\033[0m $*" >&2; exit 1; }
+step() { echo "[STEP] $*"; }
+ok()   { echo "[OK]   $*"; }
+warn() { echo "[WARN] $*"; }
+die()  { echo "[ERROR] $*" >&2; exit 1; }
 
 require_cmd() {
   command -v "$1" &>/dev/null || die "Missing required command: $1"
@@ -71,11 +72,37 @@ ensure_host_entry() {
   fi
 }
 
+cleanup_stale_macos_nix_installer_backups() {
+  # The official installer aborts if these backup files already exist.
+  local f
+  local moved=0
+  for f in \
+    /etc/bashrc.backup-before-nix \
+    /etc/zshrc.backup-before-nix \
+    /etc/bash.bashrc.backup-before-nix
+  do
+    if [[ -f "$f" ]]; then
+      local archived="${f}.pre-install-${RUN_ID}"
+      step "Archiving stale installer backup $f -> $archived"
+      sudo mv "$f" "$archived"
+      moved=1
+    fi
+  done
+
+  if [[ "$moved" -eq 1 ]]; then
+    ok "Archived stale nix installer backup files"
+  fi
+}
+
 preflight
 
-# ── 1. Install Nix (official installer) ───────────────────────────────────────
+# -- 1. Install Nix (official installer) ---------------------------------------
 if ! command -v nix &>/dev/null; then
-  step "Installing Nix via official installer (nixos.org)…"
+  if [[ "${OS}" == "Darwin" ]]; then
+    cleanup_stale_macos_nix_installer_backups
+  fi
+
+  step "Installing Nix via official installer (nixos.org)..."
   curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon --yes
   # shellcheck disable=SC1091
   source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -87,15 +114,15 @@ fi
 # Make sure nix-darwin binaries are reachable in non-login shells.
 export PATH="/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH"
 
-# ── 2. Enable flakes (just in case the installer didn't) ─────────────────────
+# -- 2. Enable flakes (just in case the installer didn't) ---------------------
 if [[ -f "$NIX_CONF" ]] && ! grep -q "experimental-features" "$NIX_CONF"; then
-  step "Enabling flakes in $NIX_CONF…"
+  step "Enabling flakes in $NIX_CONF..."
   echo "experimental-features = nix-command flakes" | sudo tee -a "$NIX_CONF"
 fi
 
-# ── 3. Clone repo if needed ───────────────────────────────────────────────────
+# -- 3. Clone repo if needed ---------------------------------------------------
 if [[ ! -d "$REPO_DIR" ]]; then
-  step "Cloning nix-home to $REPO_DIR…"
+  step "Cloning nix-home to $REPO_DIR..."
   git clone https://github.com/atrakic/nix-home "$REPO_DIR"
 else
   ok "Repo already present at $REPO_DIR"
@@ -110,31 +137,31 @@ else
   ensure_host_entry "$REPO_DIR/flake.nix" "linuxHosts"
 fi
 
-# ── 4. Back up /etc files that nix-darwin will manage (macOS only) ──────────
+# -- 4. Back up /etc files that nix-darwin will manage (macOS only) ----------
 if [[ "$OS" == "Darwin" ]]; then
   for f in /etc/zshrc /etc/zprofile /etc/bashrc; do
     if [[ -f "$f" && ! -L "$f" ]]; then
-      step "Backing up $f → ${f}.before-nix-darwin"
+      step "Backing up $f -> ${f}.before-nix-darwin"
       sudo mv "$f" "${f}.before-nix-darwin" 2>/dev/null || warn "Could not back up $f (continuing)"
     fi
   done
 fi
 
-# ── 5. Activate system config ──────────────────────────────────────────────────
+# -- 5. Activate system config --------------------------------------------------
 if [[ "$OS" == "Darwin" ]]; then
   if ! command -v darwin-rebuild &>/dev/null; then
-    step "Bootstrapping nix-darwin for host '$TARGET_HOST'…"
+    step "Bootstrapping nix-darwin for host '$TARGET_HOST'..."
     sudo nix run nix-darwin -- switch --flake "$REPO_DIR#$TARGET_HOST"
   else
-    step "Running darwin-rebuild switch for host '$TARGET_HOST'…"
+    step "Running darwin-rebuild switch for host '$TARGET_HOST'..."
     sudo darwin-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
   fi
 elif [[ "$OS" == "Linux" ]]; then
   if command -v nixos-rebuild &>/dev/null; then
-    step "Running nixos-rebuild switch for host '$TARGET_HOST'…"
+    step "Running nixos-rebuild switch for host '$TARGET_HOST'..."
     sudo nixos-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
   else
-    step "Running nixos-rebuild via nix run for host '$TARGET_HOST'…"
+    step "Running nixos-rebuild via nix run for host '$TARGET_HOST'..."
     sudo nix run nixpkgs#nixos-rebuild -- switch --flake "$REPO_DIR#$TARGET_HOST"
   fi
 fi
@@ -142,6 +169,6 @@ fi
 ok "Done! Open a new shell or run:  exec \$SHELL -l"
 echo ""
 echo "  Useful commands:"
-echo "    make          → re-apply config changes"
-echo "    make update   → update flake inputs"
-echo "    make gc       → clean up old nix store"
+echo "    make          -> re-apply config changes"
+echo "    make update   -> update flake inputs"
+echo "    make gc       -> clean up old nix store"

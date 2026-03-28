@@ -1,4 +1,4 @@
-# Test image — runs lint/check targets inside a Nix container (Linux).
+# Test image - runs lint/check targets inside a Nix container (Linux).
 # nix-darwin & Homebrew are macOS-only and are NOT tested here.
 # What IS tested: flake evaluation, nixfmt, statix, deadnix.
 FROM nixos/nix:latest

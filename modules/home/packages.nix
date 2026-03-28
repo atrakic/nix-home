@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    # ── Shell utilities ──────────────────────────────────────────────
+    # -- Shell utilities ----------------------------------------------
     bat # better cat
     eza # better ls
     fd # better find
@@ -19,14 +19,14 @@
     duf # better df
     procs # better ps
 
-    # ── Network ──────────────────────────────────────────────────────
+    # -- Network ------------------------------------------------------
     curl
     wget
     httpie
     nmap
     mtr
 
-    # ── Dev ──────────────────────────────────────────────────────────
+    # -- Dev ----------------------------------------------------------
     git
     git-lfs
     tig
@@ -38,7 +38,7 @@
     age # modern encryption
     sops # secrets management
 
-    # ── Languages & runtimes ─────────────────────────────────────────
+    # -- Languages & runtimes -----------------------------------------
     python313
     uv # fast Python package manager
     nodejs_22
@@ -46,18 +46,18 @@
     rustup
     dotnet-sdk_10 # .NET 10 (latest)
 
-    # ── Data ─────────────────────────────────────────────────────────
+    # -- Data ---------------------------------------------------------
     postgresql # psql client
     redis # redis-cli
     duckdb
 
-    # ── Cloud / Infra ─────────────────────────────────────────────────
+    # -- Cloud / Infra -------------------------------------------------
     kubectl
     kubectx
     helm
     k9s # Kubernetes TUI
 
-    # ── Misc ─────────────────────────────────────────────────────────
+    # -- Misc ---------------------------------------------------------
     fastfetch # system info (neofetch replacement)
     yt-dlp # download YouTube / 1000+ sites
     nixfmt # nix formatter

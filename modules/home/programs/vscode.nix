@@ -5,48 +5,48 @@
     package = pkgs.vscode; # switch to pkgs.vscodium for open-source build
 
     profiles.default = {
-      # ── Extensions ──────────────────────────────────────────────────
+      # -- Extensions --------------------------------------------------
       extensions = with pkgs.vscode-extensions; [
-        # ── AI ─────────────────────────────────────────────────────────
+        # -- AI ---------------------------------------------------------
         github.copilot
         github.copilot-chat
 
-        # ── Python ─────────────────────────────────────────────────────
+        # -- Python -----------------------------------------------------
         ms-python.python
         ms-python.debugpy
         charliermarsh.ruff
 
-        # ── TypeScript / JavaScript ─────────────────────────────────────
+        # -- TypeScript / JavaScript -------------------------------------
         dbaeumer.vscode-eslint
         esbenp.prettier-vscode
 
-        # ── Go ──────────────────────────────────────────────────────────
+        # -- Go ----------------------------------------------------------
         golang.go
 
-        # ── Nix ─────────────────────────────────────────────────────────
+        # -- Nix ---------------------------------------------------------
         jnoortheen.nix-ide
 
-        # ── Infrastructure / Cloud ──────────────────────────────────────
+        # -- Infrastructure / Cloud --------------------------------------
         redhat.vscode-yaml
 
-        # ── Notebooks / Data ────────────────────────────────────────────
+        # -- Notebooks / Data --------------------------------------------
         ms-toolsai.jupyter
 
-        # ── Git ─────────────────────────────────────────────────────────
+        # -- Git ---------------------------------------------------------
         eamodio.gitlens
 
-        # ── Remote / Containers ─────────────────────────────────────────
+        # -- Remote / Containers -----------------------------------------
         ms-vscode-remote.remote-containers
 
-        # ── Editors / UX ────────────────────────────────────────────────
+        # -- Editors / UX ------------------------------------------------
         vscodevim.vim
         editorconfig.editorconfig
-        # ── Marketplace extensions (add sha256 and uncomment to enable) ──
+        # -- Marketplace extensions (add sha256 and uncomment to enable) --
         # Use: nix-prefetch-url <vsix-url>
         # ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [ { ... } ]
       ];
 
-      # ── User settings ────────────────────────────────────────────────
+      # -- User settings ------------------------------------------------
       userSettings = {
         # Appearance
         "workbench.colorTheme" = "Catppuccin Mocha";
@@ -156,7 +156,7 @@
         "redhat.telemetry.enabled" = false;
       };
 
-      # ── Keyboard shortcuts ───────────────────────────────────────────
+      # -- Keyboard shortcuts -------------------------------------------
       keybindings = [
         {
           key = "ctrl+shift+`";

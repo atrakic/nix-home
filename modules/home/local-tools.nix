@@ -1,18 +1,18 @@
 _: {
-  # ── ~/bin — personal scripts managed by home-manager ─────────────────
+  # -- ~/bin - personal scripts managed by home-manager -----------------
   # Files here are symlinked from the Nix store; make them executable via
   # the `executable = true` attribute.
 
   home.file = {
 
-    # ── localhost.run tunnel ──────────────────────────────────────────
+    # -- localhost.run tunnel ------------------------------------------
     # Expose a local port via the free localhost.run SSH tunnel service.
     # Usage: ~/bin/localhost.run.sh [PORT]   (default: 8080)
     "bin/localhost.run.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # localhost.run — expose a local port over an SSH reverse tunnel
+        # localhost.run - expose a local port over an SSH reverse tunnel
         # https://localhost.run/docs/
         set -euo pipefail
 
@@ -40,7 +40,7 @@ _: {
           SSH_OPTS+=(-i "''${KEY}")
         fi
 
-        echo "→ Tunnelling localhost:''${PORT} via ''${REMOTE_HOST} …"
+        echo "-> Tunnelling localhost:''${PORT} via ''${REMOTE_HOST} ..."
         echo "  (Press Ctrl-C to stop)"
         echo ""
 

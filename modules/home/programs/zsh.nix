@@ -62,7 +62,7 @@
 
       oh-my-zsh = {
         enable = true;
-        # No theme — starship handles the prompt
+        # No theme - starship handles the prompt
         plugins = [
           "git"
           "fzf"
@@ -74,21 +74,21 @@
       };
 
       initContent = ''
-        # ── fzf key bindings ──────────────────────────────────────────
+        # -- fzf key bindings ------------------------------------------
         source ${pkgs.fzf}/share/fzf/key-bindings.zsh 2>/dev/null || true
         source ${pkgs.fzf}/share/fzf/completion.zsh   2>/dev/null || true
 
-        # ── direnv ─────────────────────────────────────────────────────
+        # -- direnv -----------------------------------------------------
         eval "$(direnv hook zsh)"
 
-        # ── .NET ───────────────────────────────────────────────────────
+        # -- .NET -------------------------------------------------------
         export DOTNET_ROOT="$(dirname $(which dotnet))"
         export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-        # ── Local overrides ────────────────────────────────────────────
+        # -- Local overrides --------------------------------------------
         [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
-        # ── Path additions ─────────────────────────────────────────────
+        # -- Path additions ---------------------------------------------
         path=(
           "$HOME/bin"
           "$HOME/.local/bin"
@@ -107,8 +107,8 @@
         add_newline = true;
 
         character = {
-          success_symbol = "[❯](bold green)";
-          error_symbol = "[❯](bold red)";
+          success_symbol = "[>](bold green)";
+          error_symbol = "[>](bold red)";
         };
 
         directory = {
@@ -122,10 +122,10 @@
         golang.symbol = " ";
         rust.symbol = " ";
         docker_context.symbol = " ";
-        terraform.symbol = "󱁢 ";
+        terraform.symbol = "tf ";
         kubernetes = {
           disabled = false;
-          symbol = "☸ ";
+          symbol = "k8s ";
         };
       };
     };

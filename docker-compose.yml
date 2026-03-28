@@ -1,4 +1,4 @@
-# ── Docker Compose — nix-home test environment ───────────────────────────────
+# -- Docker Compose - nix-home test environment -------------------------------
 #
 # Runs lint/check targets inside a Nix container (Linux).
 # NOTE: nix-darwin & Homebrew are macOS-only and are NOT tested here.
@@ -9,7 +9,7 @@
 #   docker compose run --rm fmt        # format check only
 #   docker compose run --rm lint       # statix + deadnix only
 #   docker compose run --rm check      # nix flake check --no-build only
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 x-nix-base: &nix-base
   build:
@@ -21,20 +21,20 @@ x-nix-base: &nix-base
   working_dir: /workspace
 
 services:
-  # Format check — mirrors `nix fmt -- --check .`
+  # Format check - mirrors `nix fmt -- --check .`
   fmt:
     <<: *nix-base
     command: >-
       nix fmt -- --check .
 
-  # Static analysis — deadnix (unused bindings) + statix (anti-patterns)
+  # Static analysis - deadnix (unused bindings) + statix (anti-patterns)
   lint:
     <<: *nix-base
     command: >-
       sh -c "nix run nixpkgs#deadnix -- --fail . &&
              nix run nixpkgs#statix -- check ."
 
-  # Flake evaluation — no build, catches type/assertion errors
+  # Flake evaluation - no build, catches type/assertion errors
   check:
     <<: *nix-base
     command: >-

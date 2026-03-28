@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  # ── Hardware ─────────────────────────────────────────────────────────
+  # -- Hardware ---------------------------------------------------------
   # Replace these with your actual hardware-configuration.nix values.
   # Run `nixos-generate-config` on the target machine and paste the output.
   fileSystems."/" = {
@@ -11,7 +11,7 @@
     enable = true;
     device = "/dev/sda"; # or "nodev" for EFI
   };
-  # ── Nix settings ────────────────────────────────────────────────────
+  # -- Nix settings ----------------------------------------------------
   nix = {
     settings = {
       experimental-features = [
@@ -28,12 +28,12 @@
     };
   };
 
-  # ── Shell ────────────────────────────────────────────────────────────
+  # -- Shell ------------------------------------------------------------
   programs.zsh.enable = true;
 
   environment.systemPackages = [ pkgs.vim ]; # bare minimum in PATH
 
-  # ── System ───────────────────────────────────────────────────────────
+  # -- System -----------------------------------------------------------
   # Allow unfree packages (VSCode, etc.)
   nixpkgs.config.allowUnfree = true;
 
@@ -41,7 +41,7 @@
   i18n.defaultLocale = "en_US.UTF-8";
   time.timeZone = "Europe/Stockholm";
 
-  # ── SSH ──────────────────────────────────────────────────────────────
+  # -- SSH --------------------------------------------------------------
   services.openssh = {
     enable = true;
     settings = {

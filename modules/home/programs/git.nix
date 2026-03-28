@@ -28,7 +28,7 @@
         autocrlf = "input";
         whitespace = "trailing-space,space-before-tab";
       };
-      # macOS keychain — ignored on Linux
+      # macOS keychain - ignored on Linux
       credential.helper = pkgs.lib.optionalString pkgs.stdenv.isDarwin "osxkeychain";
       url."git@github.com:".insteadOf = "https://github.com/";
     };
