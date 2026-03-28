@@ -9,15 +9,15 @@
         Plug 'christoomey/vim-tmux-navigator'
         Plug 'tpope/vim-commentary'
         Plug 'williamboman/mason.nvim'
-        Plug 'scrooloose/nerdtree'
+        Plug 'preservim/nerdtree'
         Plug 'Xuyuanp/nerdtree-git-plugin'
         Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
         Plug 'tpope/vim-fugitive'
         Plug 'tpope/vim-sensible'
         Plug 'airblade/vim-gitgutter'
-        Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+        Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
         Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-        Plug 'https://github.com/nanotech/jellybeans.vim'
+        Plug 'nanotech/jellybeans.vim'
         Plug 'jayli/vim-easycomplete'
         Plug 'williamboman/nvim-lsp-installer'
         call plug#end()
