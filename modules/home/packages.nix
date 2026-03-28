@@ -54,7 +54,7 @@
     # -- Cloud / Infra -------------------------------------------------
     kubectl
     kubectx
-    helm
+    kubernetes-helm
     k9s # Kubernetes TUI
 
     # -- Misc ---------------------------------------------------------
