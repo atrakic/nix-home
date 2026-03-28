@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   # Install vim-plug to ~/.vim/autoload/plug.vim
   home.file = {
