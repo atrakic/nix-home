@@ -18,6 +18,7 @@ TARGET_HOST="${TARGET_HOST:-${DETECTED_HOST%%.*}}"  # must match flake key
 OS="$(uname -s)"
 RUN_ID="$(date +%Y%m%d-%H%M%S)"
 NIX_BIN="$(command -v nix 2>/dev/null || echo /nix/var/nix/profiles/default/bin/nix)"
+ROOT_PATH="/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 step() { echo "[STEP] $*"; }
 ok()   { echo "[OK]   $*"; }
@@ -26,6 +27,10 @@ die()  { echo "[ERROR] $*" >&2; exit 1; }
 
 require_cmd() {
   command -v "$1" &>/dev/null || die "Missing required command: $1"
+}
+
+run_nix_as_root() {
+  sudo env PATH="$ROOT_PATH" nix --extra-experimental-features "nix-command flakes" "$@"
 }
 
 preflight() {
@@ -205,7 +210,7 @@ fi
 if [[ "$OS" == "Darwin" ]]; then
   if ! command -v darwin-rebuild &>/dev/null; then
     step "Bootstrapping nix-darwin for host '$TARGET_HOST'..."
-    sudo "$NIX_BIN" --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake "$REPO_DIR#$TARGET_HOST"
+    run_nix_as_root run nix-darwin -- switch --flake "$REPO_DIR#$TARGET_HOST"
   else
     step "Running darwin-rebuild switch for host '$TARGET_HOST'..."
     sudo darwin-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
@@ -216,7 +221,7 @@ elif [[ "$OS" == "Linux" ]]; then
     sudo nixos-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
   else
     step "Running nixos-rebuild via nix run for host '$TARGET_HOST'..."
-    sudo "$NIX_BIN" --extra-experimental-features "nix-command flakes" run nixpkgs#nixos-rebuild -- switch --flake "$REPO_DIR#$TARGET_HOST"
+    run_nix_as_root run nixpkgs#nixos-rebuild -- switch --flake "$REPO_DIR#$TARGET_HOST"
   fi
 fi
 

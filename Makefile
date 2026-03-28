@@ -13,6 +13,8 @@ UNAME      := $(shell uname -s)
 HOSTNAME   := $(shell h=$$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "$${HOSTNAME:-unknown}"); printf '%s' "$${h%%.*}")
 NIX_BIN    := $(shell command -v nix 2>/dev/null || echo /nix/var/nix/profiles/default/bin/nix)
 NIX        := $(NIX_BIN) --extra-experimental-features "nix-command flakes"
+ROOT_PATH  := /nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+ROOT_NIX   := sudo env PATH="$(ROOT_PATH)" nix --extra-experimental-features "nix-command flakes"
 DOCKER     := DOCKER_HOST=unix:///var/run/docker.sock docker compose
 TARGET_HOST ?=
 
@@ -58,7 +60,7 @@ ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
 		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
 	else \
-		sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
+		$(ROOT_NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
 	fi
 else
 	sudo nixos-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"
@@ -71,7 +73,7 @@ ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
 		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
 	else \
-		sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
+		$(ROOT_NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
 	fi
 else
 	sudo nixos-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"
@@ -130,7 +132,7 @@ clean:                        ## Remove result symlink
 .PHONY: bootstrap
 bootstrap: ensure-host ensure-brew ensure-darwin-etc ## Install nix-darwin for the first time
 	@echo "-> Installing nix-darwin..."
-	sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"
+	$(ROOT_NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"
 
 # -- Info ---------------------------------------------------------------------
 
@@ -144,7 +146,7 @@ ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
 		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60; \
 	else \
-		sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60; \
+		$(ROOT_NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60; \
 	fi
 else
 	sudo nixos-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60
