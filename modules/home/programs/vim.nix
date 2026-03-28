@@ -43,4 +43,6 @@
       map <C-b> :Buffers<CR>
     '';
   };
+  programs.vim.extraConfig =
+    builtins.readFile ./vimrc;
 }

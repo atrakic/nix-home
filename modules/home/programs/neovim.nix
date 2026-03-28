@@ -224,4 +224,7 @@
       map("v", "K", ":m '<-2<CR>gv=gv")
     '';
   };
+
+  # Load vimrc from version-controlled modules/home/vimrc for user customizations
+  config = builtins.readFile ../vimrc;
 }
