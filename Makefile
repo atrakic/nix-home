@@ -1,3 +1,7 @@
+.PHONY: user-apply
+user-apply:
+	@echo "Running home-manager switch as $(USER) to ensure user dotfiles are created..."
+	$(HOME)/.nix-profile/bin/home-manager switch || home-manager switch
 # -- nix-home Makefile --------------------------------------------------------
 # Usage:
 #   make          -> apply (macOS) or test (Linux, CI)
