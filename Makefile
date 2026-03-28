@@ -39,7 +39,7 @@ FLAKE_HOST := $(if $(TARGET_HOST),$(TARGET_HOST),$(DEFAULT_FLAKE_HOST))
 
 # Make spawns a non-interactive sh that doesn't source shell profiles.
 # Prepend the standard Nix / nix-darwin binary paths so tools are found.
-export PATH := /run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$(PATH)
+export PATH := /opt/homebrew/bin:/usr/local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$(PATH)
 
 
 # On Linux (container / CI) default to the lint+check suite; on macOS apply.
@@ -52,7 +52,7 @@ endif
 # -- Primary targets ----------------------------------------------------------
 
 .PHONY: apply
-apply: ensure-host            ## * Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
+apply: ensure-host ensure-brew ## * Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
 ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
 		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
@@ -64,7 +64,7 @@ else
 endif
 
 .PHONY: update
-update: ensure-host           ## Update flake inputs then apply
+update: ensure-host ensure-brew ## Update flake inputs then apply
 	$(NIX) flake update
 ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
@@ -127,7 +127,7 @@ clean:                        ## Remove result symlink
 # -- Bootstrap (first run only) ------------------------------------------------
 
 .PHONY: bootstrap
-bootstrap: ensure-host        ## Install nix-darwin for the first time
+bootstrap: ensure-host ensure-brew ## Install nix-darwin for the first time
 	@echo "-> Installing nix-darwin..."
 	sudo $(NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"
 
@@ -138,7 +138,7 @@ show:                         ## Show flake outputs
 	$(NIX) flake show .
 
 .PHONY: diff
-diff: ensure-host             ## Show what would change (dry-run)
+diff: ensure-host ensure-brew ## Show what would change (dry-run)
 ifeq ($(UNAME),Darwin)
 	@if command -v darwin-rebuild >/dev/null 2>&1; then \
 		darwin-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)" --dry-run 2>&1 | head -60; \
@@ -157,6 +157,19 @@ ensure-host:
 		exit 1; \
 	fi
 	@echo "Using flake host: $(FLAKE_HOST)"
+
+.PHONY: ensure-brew
+ensure-brew:
+ifeq ($(UNAME),Darwin)
+	@if command -v brew >/dev/null 2>&1; then \
+		echo "Homebrew found: $$(command -v brew)"; \
+	else \
+		echo "Homebrew not found. Installing Homebrew..."; \
+		NONINTERACTIVE=1 /bin/bash -c "$$(/usr/bin/curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
+	fi
+else
+	@true
+endif
 
 .PHONY: help
 help:                         ## Print this help message

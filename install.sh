@@ -73,6 +73,20 @@ ensure_host_entry() {
   fi
 }
 
+ensure_homebrew_on_macos() {
+  if [[ "${OS}" != "Darwin" ]]; then
+    return
+  fi
+
+  if command -v brew &>/dev/null; then
+    ok "Homebrew already installed: $(command -v brew)"
+    return
+  fi
+
+  step "Homebrew not found. Installing Homebrew..."
+  NONINTERACTIVE=1 /bin/bash -c "$(/usr/bin/curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+}
+
 cleanup_stale_macos_nix_installer_backups() {
   # The official installer aborts if these backup files already exist.
   local f
@@ -97,6 +111,8 @@ cleanup_stale_macos_nix_installer_backups() {
 
 preflight
 
+ensure_homebrew_on_macos
+
 # -- 1. Install Nix (official installer) ---------------------------------------
 if ! command -v nix &>/dev/null; then
   if [[ "${OS}" == "Darwin" ]]; then
@@ -114,6 +130,7 @@ fi
 
 # Make sure nix-darwin binaries are reachable in non-login shells.
 export PATH="/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH"
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 # -- 2. Enable flakes (just in case the installer didn't) ---------------------
 if [[ -f "$NIX_CONF" ]] && ! grep -q "experimental-features" "$NIX_CONF"; then
