@@ -4,7 +4,7 @@
     enable = true;
     defaultEditor = true;
     viAlias = true;
-    vimAlias = true;
+    vimAlias = false;
 
     withPython3 = true;
     withNodeJs = true;
