@@ -87,6 +87,18 @@ ensure_homebrew_on_macos() {
   NONINTERACTIVE=1 /bin/bash -c "$(/usr/bin/curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
+ensure_darwin_etc_files() {
+  if [[ "${OS}" != "Darwin" ]]; then
+    return
+  fi
+
+  if [[ ! -e /etc/synthetic.conf ]]; then
+    step "Creating empty /etc/synthetic.conf"
+    sudo touch /etc/synthetic.conf
+    sudo chmod 644 /etc/synthetic.conf
+  fi
+}
+
 cleanup_stale_macos_nix_installer_backups() {
   # The official installer aborts if these backup files already exist.
   local f
@@ -112,6 +124,7 @@ cleanup_stale_macos_nix_installer_backups() {
 preflight
 
 ensure_homebrew_on_macos
+ensure_darwin_etc_files
 
 # -- 1. Install Nix (official installer) ---------------------------------------
 if ! command -v nix &>/dev/null; then

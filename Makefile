@@ -174,6 +174,11 @@ endif
 .PHONY: ensure-darwin-etc
 ensure-darwin-etc:
 ifeq ($(UNAME),Darwin)
+	@if [ ! -e /etc/synthetic.conf ]; then \
+		echo "Creating empty /etc/synthetic.conf"; \
+		sudo touch /etc/synthetic.conf; \
+		sudo chmod 644 /etc/synthetic.conf; \
+	fi
 	@for f in /etc/nix/nix.conf /etc/bashrc /etc/zshrc /etc/zprofile; do \
 		if [ -e "$$f" ] && [ ! -L "$$f" ]; then \
 			backup="$$f.before-nix-darwin"; \
