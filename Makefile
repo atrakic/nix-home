@@ -62,8 +62,12 @@ ifeq ($(UNAME),Darwin)
 	else \
 		$(ROOT_NIX) run nix-darwin -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"; \
 	fi
+	@echo "Running home-manager switch as $(USER) to ensure user dotfiles are created..."
+	home-manager switch
 else
 	sudo nixos-rebuild switch --flake "$(FLAKE)#$(FLAKE_HOST)"
+	@echo "Running home-manager switch as $(USER) to ensure user dotfiles are created..."
+	home-manager switch
 endif
 
 .PHONY: update
