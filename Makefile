@@ -14,11 +14,6 @@ HOSTNAME   := $(shell hostname -s 2>/dev/null || echo "$${HOSTNAME:-unknown}")
 NIX        := nix --extra-experimental-features "nix-command flakes"
 DOCKER     := DOCKER_HOST=unix:///var/run/docker.sock docker compose
 
-ifeq ($(UNAME),Darwin)
-  REBUILD  := darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
-else
-  REBUILD  := sudo nixos-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
-endif
 
 # On Linux (container / CI) default to the lint+check suite; on macOS apply.
 ifeq ($(UNAME),Darwin)
@@ -31,12 +26,20 @@ endif
 
 .PHONY: apply
 apply:                        ## ★ Apply config (darwin-rebuild on macOS, nixos-rebuild on Linux)
-	$(REBUILD)
+ifeq ($(UNAME),Darwin)
+	darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+else
+	sudo nixos-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+endif
 
 .PHONY: update
 update:                       ## Update flake inputs then apply
 	$(NIX) flake update
-	$(REBUILD)
+ifeq ($(UNAME),Darwin)
+	darwin-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+else
+	sudo nixos-rebuild switch --flake "$(FLAKE)#$(HOSTNAME)"
+endif
 
 .PHONY: check
 check:                        ## Evaluate flake without building (fast lint)
