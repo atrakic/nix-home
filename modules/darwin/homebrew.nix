@@ -23,8 +23,8 @@ _: {
 
       # -- Dev tools ---------------------------------------------------
       "podman-desktop" # OCI container GUI (Docker alternative)
-      "tableplus" # DB GUI (Postgres, MySQL, Redis, ...)
-      "insomnia" # REST / GraphQL client
+      #"tableplus" # DB GUI (Postgres, MySQL, Redis, ...)
+      #"insomnia" # REST / GraphQL client
       "iterm2"
 
       # -- Productivity -------------------------------------------------
@@ -32,7 +32,7 @@ _: {
       "displaylink" # DisplayLink Manager (external displays)
 
       # -- Network ------------------------------------------------------
-      "tailscale" # VPN mesh network
+      #"tailscale" # VPN mesh network
 
       # -- Media --------------------------------------------------------
       "vlc" # Media player
