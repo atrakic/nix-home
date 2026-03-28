@@ -225,6 +225,6 @@
     '';
   };
 
-  # Load vimrc from version-controlled modules/home/vimrc for user customizations
-  config = builtins.readFile ../vimrc;
+    # Load vimrc from version-controlled modules/home/vimrc for user customizations
+    extraConfig = builtins.readFile ../vimrc;
 }
