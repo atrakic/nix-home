@@ -35,7 +35,7 @@ cd ~/.config/nix-home
 # 1. Add your machine to darwinHosts / linuxHosts in flake.nix (key = hostname -s)
 # 2. Bootstrap & apply:
 make bootstrap   # first time - installs nix-darwin (requires sudo)
-make             # apply config
+make apply       # apply config (no sudo needed)
 ```
 
 ---
@@ -44,7 +44,7 @@ make             # apply config
 
 | Command          | Description                                   |
 | ---------------- | --------------------------------------------- |
-| `make`           | * Apply all config changes                    |
+| `make apply`     | * Apply all config changes (user + system)   |
 | `make bootstrap` | First-time nix-darwin install (requires sudo) |
 | `make update`    | Update all flake inputs, then apply           |
 | `make check`     | Evaluate flake without building (fast lint)   |
@@ -53,8 +53,19 @@ make             # apply config
 | `make diff`      | Preview what would change (dry-run)           |
 | `make help`      | List all targets                              |
 
-The Makefile auto-detects your hostname (`hostname -s`) and selects the
-matching `darwinConfigurations` / `nixosConfigurations` entry from the flake.
+
+**Usage:**
+- Always use `make apply` (no sudo needed). The Makefile will:
+  1. Use sudo only for the system activation step (nix-darwin/nixos-rebuild).
+  2. Always run `home-manager switch` as your user, so all dotfiles (like `.vimrc`) and plugin directories (`.vim/plugged`) are created and up to date.
+
+**Vim setup:**
+- Your `.vimrc` and `.vim/autoload/plug.vim` are managed by Nix/home-manager.
+- All plugins in your `.vimrc` are auto-installed after every `make apply`.
+**.vimrc or plugins not present after apply?**
+
+Make sure you are running `make apply` as your user (not with sudo). The Makefile will handle sudo only for the system step, and always run `home-manager switch` as your user to set up all dotfiles and plugins.
+
 
 ---
 
