@@ -11,7 +11,7 @@
   };
 
   # Post-activation: run PlugInstall if vim is available
-  home.activation.vimPlugInstall = pkgs.lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.vimPlugInstall = config.lib.dag.entryAfter [ "writeBoundary" ] ''
     if command -v vim >/dev/null 2>&1; then
       echo "Running PlugInstall to install Vim plugins..."
       vim +PlugInstall +qall || true
