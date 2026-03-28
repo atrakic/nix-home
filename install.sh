@@ -13,6 +13,7 @@ set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-$HOME/.config/nix-home}"
 NIX_CONF="/etc/nix/nix.conf"
+TARGET_HOST="${TARGET_HOST:-$(hostname -s 2>/dev/null || echo "unknown")}"  # must match flake key
 
 step() { echo -e "\033[1;34m==>\033[0m $*"; }
 ok()   { echo -e "\033[1;32m ✓\033[0m  $*"; }
@@ -21,17 +22,19 @@ die()  { echo -e "\033[1;31mERROR:\033[0m $*" >&2; exit 1; }
 
 [[ "$(uname)" == "Darwin" ]] || die "macOS only"
 
-# ── 1. Install Nix (Determinate Systems installer) ───────────────────────────
+# ── 1. Install Nix (official installer) ───────────────────────────────────────
 if ! command -v nix &>/dev/null; then
-  step "Installing Nix via Determinate Systems installer…"
-  curl --proto '=https' --tlsv1.2 -sSf \
-    https://install.determinate.systems/nix | sh -s -- install --no-confirm
+  step "Installing Nix via official installer (nixos.org)…"
+  curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon --yes
   # shellcheck disable=SC1091
   source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
   ok "Nix installed: $(nix --version)"
 else
   ok "Nix already installed: $(nix --version)"
 fi
+
+# Make sure nix-darwin binaries are reachable in non-login shells.
+export PATH="/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH"
 
 # ── 2. Enable flakes (just in case the installer didn't) ─────────────────────
 if [[ -f "$NIX_CONF" ]] && ! grep -q "experimental-features" "$NIX_CONF"; then
@@ -59,11 +62,11 @@ done
 
 # ── 5. Bootstrap nix-darwin (first-time only) ─────────────────────────────────
 if ! command -v darwin-rebuild &>/dev/null; then
-  step "Bootstrapping nix-darwin…"
-  nix run nix-darwin -- switch --flake "$REPO_DIR"
+  step "Bootstrapping nix-darwin for host '$TARGET_HOST'…"
+  sudo nix run nix-darwin -- switch --flake "$REPO_DIR#$TARGET_HOST"
 else
-  step "Running darwin-rebuild switch…"
-  darwin-rebuild switch --flake "$REPO_DIR"
+  step "Running darwin-rebuild switch for host '$TARGET_HOST'…"
+  sudo darwin-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
 fi
 
 ok "Done! Open a new shell or run:  exec \$SHELL -l"

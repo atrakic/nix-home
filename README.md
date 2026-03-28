@@ -154,11 +154,11 @@ Podman Desktop, TablePlus, Insomnia, iTerm2, Rectangle, Tailscale, VLC
 
 ## Prerequisites
 
-| Requirement        | Notes                                           |
-| ------------------ | ----------------------------------------------- |
-| macOS 14+ (Sonoma) | arm64 or x86_64                                 |
-| Xcode CLT          | `xcode-select --install`                        |
-| Nix                | Installed by `install.sh` (Determinate Systems) |
+| Requirement        | Notes                                          |
+| ------------------ | ---------------------------------------------- |
+| macOS 14+ (Sonoma) | arm64 or x86_64                                |
+| Xcode CLT          | `xcode-select --install`                       |
+| Nix                | Installed by `install.sh` (official installer) |
 
 ---
 
