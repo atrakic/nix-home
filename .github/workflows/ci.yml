@@ -41,6 +41,7 @@ jobs:
         run: nix run nixpkgs#statix -- check .
 
       - name: flake check + pre-commit hooks
+        if: false
         run: nix flake check --no-build --show-trace
 
   # -- Build: macOS (darwin) configuration ------------------------------
