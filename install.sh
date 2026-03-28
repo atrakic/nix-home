@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ── install.sh ───────────────────────────────────────────────────────────────
-# Bootstrap a brand-new macOS machine with nix-darwin + home-manager.
+# Bootstrap a brand-new machine (macOS or Linux) with this flake.
 # Run this ONCE on a fresh machine.
 #
 #   curl -fsSL https://raw.githubusercontent.com/atrakic/nix-home/main/install.sh | bash
@@ -14,13 +14,64 @@ set -euo pipefail
 REPO_DIR="${REPO_DIR:-$HOME/.config/nix-home}"
 NIX_CONF="/etc/nix/nix.conf"
 TARGET_HOST="${TARGET_HOST:-$(hostname -s 2>/dev/null || echo "unknown")}"  # must match flake key
+OS="$(uname -s)"
 
 step() { echo -e "\033[1;34m==>\033[0m $*"; }
 ok()   { echo -e "\033[1;32m ✓\033[0m  $*"; }
 warn() { echo -e "\033[1;33m !\033[0m  $*"; }
 die()  { echo -e "\033[1;31mERROR:\033[0m $*" >&2; exit 1; }
 
-[[ "$(uname)" == "Darwin" ]] || die "macOS only"
+require_cmd() {
+  command -v "$1" &>/dev/null || die "Missing required command: $1"
+}
+
+preflight() {
+  step "Running preflight checks for $OS…"
+
+  case "$OS" in
+    Darwin|Linux) ;;
+    *) die "Unsupported OS '$OS' (supported: Darwin, Linux)" ;;
+  esac
+
+  require_cmd curl
+  require_cmd git
+  require_cmd sudo
+
+  # Prompt for sudo early so the rest of the flow is predictable.
+  sudo -v || die "sudo is required for installation/activation"
+
+  # Confirm installer and repo are reachable (fast fail on network/DNS issues).
+  curl --proto '=https' --tlsv1.2 -fsSLI https://nixos.org/nix/install >/dev/null \
+    || die "Cannot reach https://nixos.org/nix/install"
+  curl --proto '=https' --tlsv1.2 -fsSLI https://github.com >/dev/null \
+    || die "Cannot reach https://github.com"
+
+  if [[ "$OS" == "Darwin" ]] && ! xcode-select -p &>/dev/null; then
+    die "Xcode Command Line Tools are required. Run: xcode-select --install"
+  fi
+
+  if [[ "$OS" == "Linux" ]] && [[ ! -e /etc/NIXOS ]]; then
+    warn "Non-NixOS Linux detected. This repo applies system config via nixos-rebuild."
+    warn "Installer will continue, but final activation may not be applicable on this distro."
+  fi
+
+  ok "Preflight checks passed"
+}
+
+ensure_host_entry() {
+  local file="$1"
+  local attrset="$2"
+
+  if [[ ! -f "$file" ]]; then
+    die "Missing flake file: $file"
+  fi
+
+  if ! grep -Eq "\"${TARGET_HOST}\"[[:space:]]*=" "$file"; then
+    die "Host '$TARGET_HOST' is not defined in $attrset inside flake.nix"
+  fi
+}
+
+preflight
 
 # ── 1. Install Nix (official installer) ───────────────────────────────────────
 if ! command -v nix &>/dev/null; then
@@ -52,21 +103,40 @@ fi
 
 cd "$REPO_DIR"
 
-# ── 4. Back up /etc files that nix-darwin will manage ────────────────────────
-for f in /etc/zshrc /etc/zprofile /etc/bashrc; do
-  if [[ -f "$f" && ! -L "$f" ]]; then
-    step "Backing up $f → ${f}.before-nix-darwin"
-    sudo mv "$f" "${f}.before-nix-darwin" 2>/dev/null || warn "Could not back up $f (continuing)"
-  fi
-done
-
-# ── 5. Bootstrap nix-darwin (first-time only) ─────────────────────────────────
-if ! command -v darwin-rebuild &>/dev/null; then
-  step "Bootstrapping nix-darwin for host '$TARGET_HOST'…"
-  sudo nix run nix-darwin -- switch --flake "$REPO_DIR#$TARGET_HOST"
+# Ensure the current host key exists before attempting activation.
+if [[ "$OS" == "Darwin" ]]; then
+  ensure_host_entry "$REPO_DIR/flake.nix" "darwinHosts"
 else
-  step "Running darwin-rebuild switch for host '$TARGET_HOST'…"
-  sudo darwin-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
+  ensure_host_entry "$REPO_DIR/flake.nix" "linuxHosts"
+fi
+
+# ── 4. Back up /etc files that nix-darwin will manage (macOS only) ──────────
+if [[ "$OS" == "Darwin" ]]; then
+  for f in /etc/zshrc /etc/zprofile /etc/bashrc; do
+    if [[ -f "$f" && ! -L "$f" ]]; then
+      step "Backing up $f → ${f}.before-nix-darwin"
+      sudo mv "$f" "${f}.before-nix-darwin" 2>/dev/null || warn "Could not back up $f (continuing)"
+    fi
+  done
+fi
+
+# ── 5. Activate system config ──────────────────────────────────────────────────
+if [[ "$OS" == "Darwin" ]]; then
+  if ! command -v darwin-rebuild &>/dev/null; then
+    step "Bootstrapping nix-darwin for host '$TARGET_HOST'…"
+    sudo nix run nix-darwin -- switch --flake "$REPO_DIR#$TARGET_HOST"
+  else
+    step "Running darwin-rebuild switch for host '$TARGET_HOST'…"
+    sudo darwin-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
+  fi
+elif [[ "$OS" == "Linux" ]]; then
+  if command -v nixos-rebuild &>/dev/null; then
+    step "Running nixos-rebuild switch for host '$TARGET_HOST'…"
+    sudo nixos-rebuild switch --flake "$REPO_DIR#$TARGET_HOST"
+  else
+    step "Running nixos-rebuild via nix run for host '$TARGET_HOST'…"
+    sudo nix run nixpkgs#nixos-rebuild -- switch --flake "$REPO_DIR#$TARGET_HOST"
+  fi
 fi
 
 ok "Done! Open a new shell or run:  exec \$SHELL -l"

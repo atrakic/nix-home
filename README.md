@@ -19,6 +19,14 @@ git clone https://github.com/atrakic/nix-home ~/.config/nix-home
 cd ~/.config/nix-home && bash install.sh
 ```
 
+The installer now runs a preflight for both macOS and Linux (tools, network,
+sudo, and host key check in `flake.nix`). If your `hostname -s` differs from
+the flake key, override it:
+
+```bash
+TARGET_HOST=your-host-key bash install.sh
+```
+
 ### Already have Nix?
 
 ```bash
