@@ -2,9 +2,6 @@
 {
   imports = [ ./homebrew.nix ];
 
-  # -- Nix daemon ------------------------------------------------------
-  services.nix-daemon.enable = true;
-
   nix = {
     settings = {
       experimental-features = [
@@ -59,7 +56,7 @@
     screensaver.askForPassword = true;
   };
 
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   system.stateVersion = 5;
 }

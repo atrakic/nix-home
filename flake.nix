@@ -72,6 +72,9 @@
             ./modules/darwin
             home-manager.darwinModules.home-manager
             {
+              system.primaryUser = user;
+              nixpkgs.config.allowUnfree = true;
+
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
@@ -95,6 +98,8 @@
             ./modules/linux
             home-manager.nixosModules.home-manager
             {
+              nixpkgs.config.allowUnfree = true;
+
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
