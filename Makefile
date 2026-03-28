@@ -179,13 +179,23 @@ ifeq ($(UNAME),Darwin)
 		sudo touch /etc/synthetic.conf; \
 		sudo chmod 644 /etc/synthetic.conf; \
 	fi
-	@if ! grep -qx 'run	private/var/run' /etc/synthetic.conf; then \
+	@if ! awk '$$1 == "run" && $$2 == "private/var/run" { found = 1 } END { exit found ? 0 : 1 }' /etc/synthetic.conf; then \
 		echo "Adding /run synthetic mapping to /etc/synthetic.conf"; \
 		printf 'run\tprivate/var/run\n' | sudo tee -a /etc/synthetic.conf >/dev/null; \
 	fi
 	@if [ ! -e /run ] || [ "$$(readlink /run 2>/dev/null)" != "/private/var/run" ]; then \
 		echo "Applying synthetic filesystem entries"; \
-		sudo /System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t; \
+		if ! sudo /System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t; then \
+			echo "ERROR: macOS did not materialize /run from /etc/synthetic.conf."; \
+			echo "A reboot is required after adding the synthetic entry."; \
+			echo "Reboot, then rerun: make apply NIXPKGS_ALLOW_UNFREE=1"; \
+			exit 1; \
+		fi; \
+		if [ ! -e /run ] || [ "$$(readlink /run 2>/dev/null)" != "/private/var/run" ]; then \
+			echo "ERROR: /run is still not available after apfs.util -t."; \
+			echo "Reboot, then rerun: make apply NIXPKGS_ALLOW_UNFREE=1"; \
+			exit 1; \
+		fi; \
 	fi
 	@for f in /etc/nix/nix.conf /etc/bashrc /etc/zshrc /etc/zprofile; do \
 		if [ -e "$$f" ] && [ ! -L "$$f" ]; then \
