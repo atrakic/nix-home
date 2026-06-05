@@ -55,6 +55,10 @@
         kns = "kubens";
         kctx = "kubectx";
 
+        # Docker / Podman (docker compatibility)
+        docker = "podman";
+        "docker-compose" = "podman-compose";
+
         # Python
         py = "python3";
         pip = "uv pip";

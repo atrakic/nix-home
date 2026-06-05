@@ -57,6 +57,7 @@
     kubernetes-helm
     k9s # Kubernetes TUI
     podman # container management
+    podman-compose # docker-compose compatible CLI
 
     # -- Misc ---------------------------------------------------------
     fastfetch # system info (neofetch replacement)

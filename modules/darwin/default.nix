@@ -24,7 +24,10 @@
   # -- Shell ------------------------------------------------------------
   programs.zsh.enable = true;
 
-  environment.systemPackages = [ pkgs.vim ]; # bare minimum in PATH
+  environment.systemPackages = [
+    pkgs.vim # bare minimum in PATH
+    pkgs.podman-mac-helper # enables docker socket compatibility
+  ];
 
   # -- macOS system defaults --------------------------------------------
   system.defaults = {
