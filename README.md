@@ -126,6 +126,29 @@ Add a cask name to [`modules/darwin/homebrew.nix`](modules/darwin/homebrew.nix) 
 1. Create `modules/home/programs/mytool.nix`
 2. Import it in `modules/home/default.nix`
 
+### Add local PATH entries (outside this repo)
+
+For tools installed manually (for example OpenCode), use `~/.zshrc.local`.
+This file is loaded by `zsh` config, but **is not managed by this project**.
+
+Manual setup:
+
+```bash
+cat >> ~/.zshrc.local <<'EOF'
+# Local user-only PATH additions (not managed by nix-home)
+export PATH="$HOME/.opencode/bin:$PATH"
+EOF
+
+exec zsh -l
+```
+
+Verify:
+
+```bash
+command -v opencode
+echo "$PATH" | grep -q "$HOME/.opencode/bin" && echo "opencode path is active"
+```
+
 ---
 
 ## What's included
