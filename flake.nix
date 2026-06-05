@@ -130,6 +130,18 @@
                 then "/Users/${user}"
                 else "/home/${user}";
               nixpkgs.config.allowUnfree = true;
+            }
+          ];
+          extraSpecialArgs = { inherit user; };
+        };
+
+      mkPreCommitCheck =
+        system:
+        pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            # -- Nix ------------------------------------------------------
+            nixfmt.enable = true; # format
             statix.enable = true; # anti-patterns
             deadnix.enable = true; # unused bindings
 
