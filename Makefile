@@ -82,7 +82,7 @@ endif
 
 .PHONY: user-apply
 user-apply:                   ## Apply home-manager user configuration
-	$(NIX) run home-manager -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"
+	$(NIX) run --impure home-manager -- switch --flake "$(FLAKE)#$(FLAKE_HOST)"
 
 .PHONY: check
 check:                        ## Evaluate flake without building (fast lint)
