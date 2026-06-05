@@ -129,18 +129,7 @@
                 if system == "aarch64-darwin" || system == "x86_64-darwin"
                 then "/Users/${user}"
                 else "/home/${user}";
-            }
-          ];
-          extraSpecialArgs = { inherit user; };
-        };
-
-      mkPreCommitCheck =
-        system:
-        pre-commit-hooks.lib.${system}.run {
-          src = ./.;
-          hooks = {
-            # -- Nix ------------------------------------------------------
-            nixfmt.enable = true; # format
+              nixpkgs.config.allowUnfree = true;
             statix.enable = true; # anti-patterns
             deadnix.enable = true; # unused bindings
 
