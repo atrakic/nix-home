@@ -13,6 +13,7 @@
     ./programs/neovim.nix
     ./programs/vscode.nix
     ./programs/vim.nix
+    ./programs/podman.nix
     ./vim-plug.nix
   ];
 

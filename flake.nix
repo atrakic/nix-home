@@ -117,6 +117,23 @@
           ];
         };
 
+      mkHomeManager =
+        name: { system, user }:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.${system};
+          modules = [
+            ./modules/home
+            {
+              home.username = user;
+              home.homeDirectory =
+                if system == "aarch64-darwin" || system == "x86_64-darwin"
+                then "/Users/${user}"
+                else "/home/${user}";
+            }
+          ];
+          extraSpecialArgs = { inherit user; };
+        };
+
       mkPreCommitCheck =
         system:
         pre-commit-hooks.lib.${system}.run {
@@ -148,6 +165,9 @@
 
       # -- Linux (NixOS): `nixos-rebuild switch --flake .#<hostname>` -------
       nixosConfigurations = builtins.mapAttrs mkNixosHost linuxHosts;
+
+      # -- Standalone home-manager configs (for `make user-apply`) ----------
+      homeConfigurations = builtins.mapAttrs mkHomeManager (darwinHosts // linuxHosts);
 
       # Convenience: `nix fmt` to format all .nix files
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
