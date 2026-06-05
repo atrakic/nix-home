@@ -56,6 +56,7 @@
     kubectx
     kubernetes-helm
     k9s # Kubernetes TUI
+    podman # container management
 
     # -- Misc ---------------------------------------------------------
     fastfetch # system info (neofetch replacement)
