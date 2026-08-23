@@ -18,6 +18,7 @@
     dust # better du
     duf # better df
     procs # better ps
+    starship # prompt
 
     # -- Network ------------------------------------------------------
     curl
