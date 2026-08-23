@@ -28,6 +28,7 @@
 
         # -- Infrastructure / Cloud --------------------------------------
         redhat.vscode-yaml
+        hashicorp.terraform
 
         # -- Notebooks / Data --------------------------------------------
         ms-toolsai.jupyter
@@ -104,6 +105,10 @@
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nil";
 
+        # Terraform
+        "[terraform]"."editor.defaultFormatter" = "hashicorp.terraform";
+        "[terraform]"."editor.formatOnSave" = true;
+
         # Vim (vscodevim)
         "vim.leader" = "<space>";
         "vim.useSystemClipboard" = true;
@@ -154,6 +159,8 @@
         # Telemetry
         "telemetry.telemetryLevel" = "off";
         "redhat.telemetry.enabled" = false;
+        "telemetry.enableTelemetry" = false;
+        "telemetry.enableCrashReporter" = false;
       };
 
       # -- Keyboard shortcuts -------------------------------------------

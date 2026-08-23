@@ -58,6 +58,9 @@
     k9s # Kubernetes TUI
     podman # container management
     podman-compose # docker-compose compatible CLI
+    terraform # Infrastructure-as-code
+    terraform-ls # Terraform language server
+    tflint # Terraform linter
 
     # -- Misc ---------------------------------------------------------
     fastfetch # system info (neofetch replacement)
