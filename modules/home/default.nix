@@ -29,6 +29,8 @@
       VISUAL = "nvim";
       PAGER = "less -R";
       MANPAGER = "sh -c 'col -bx | bat -l man -p'";
+      LANG = "en_US.UTF-8";
+      LC_ALL = "en_US.UTF-8";
     };
   };
 
